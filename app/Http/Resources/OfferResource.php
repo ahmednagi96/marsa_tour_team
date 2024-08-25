@@ -21,6 +21,9 @@ class OfferResource extends JsonResource
             'offer_name'=>$this->offer_name,
             'special_price_start'=>$this->special_price_start,
             'special_price_end'=>$this->special_price_end,
+            'country'=>$this->tour->country,
+            'city'=>$this->tour->city,
+            'street'=>$this->tour->street,
             'is_favourite'=>$this->checkUserFavourite(),
         ];
 

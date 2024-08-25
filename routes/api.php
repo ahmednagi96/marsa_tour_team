@@ -5,6 +5,7 @@ use App\Http\Controllers\API\HomeController;
 use App\Http\Controllers\API\TourController;
 use App\Http\Controllers\API\TripController;
 use App\Http\Controllers\API\OfferController;
+use App\Http\Controllers\API\ProfileController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -92,6 +93,22 @@ Route::prefix('mobile')->group(function(){
             ->missing(function () {
                 return sendResponse(404, 'Offer Not Found', null);
             })->middleware('auth:sanctum');
+    });
+    Route::controller(ProfileController::class)
+    ->prefix('profile')
+    ->name('api.profile.')
+    ->middleware('auth:sanctum')
+    ->group(function () {
+        Route::get('/get-favourite', 'getAuthFavourite')
+            ->name('getAuthFavourite');
+        Route::get('/get-auth', 'index')
+            ->name('index');
+        Route::post('/update', 'update')
+            ->name('update');
+        Route::post('/update-password', 'updatePassword')
+            ->name('updatePassword');
+        Route::delete('/delete-auth', 'delete')
+            ->name('delete');
     });
 
 });
