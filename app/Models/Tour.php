@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Astrotomic\Translatable\Translatable;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Tour extends Model
@@ -50,11 +51,12 @@ class Tour extends Model
             'price'=>$this->price,
             'offer_price_percent'=>isset($this->offer)?$this->offer->offer_price_percent:null,
             'offer_price_value'=>isset($this->offer)?$this->offer->offer_price_value:null,
-            'photos' =>is_null($this->photos)?null:BASEURLPHOTO.json_decode($this->photos,true)[0],
+            'photo' =>is_null($this->photos)?null:BASEURLPHOTO.json_decode($this->photos,true)[0],
             'name' => $this->name,
             'country'=>$this->country,
             'city'=>$this->city,
-            'street'=>$this->street
+            'street'=>$this->street,
+            'is_favourite'=>$this->checkUserFavourite(),
         ];
     }
     public function formatPhotos()
@@ -70,4 +72,15 @@ class Tour extends Model
         }
         return null;
     }
+    public function userFavourite():BelongsToMany{
+        return $this->belongsToMany(User::class,'tour_favourites');
+    }
+
+    public function checkUserFavourite() {
+        if (auth('sanctum')->check()) {
+          return $this->userFavourite()->where('user_id',auth('sanctum')->id())->exists()?true:false;
+        }
+        return null;
+    }
+
 }

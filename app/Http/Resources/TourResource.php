@@ -16,7 +16,7 @@ class TourResource extends JsonResource
             'trip_name' => $this->trip->name,
             'duration'=>$this->duration,
             'price'=>$this->price,
-            'offer_price_percent'=>isset($this->offer)?$this->offer->offer_price_percent:null,
+            'offer_price_percent'=>isset($this->offer)?$this->offer->offer_price_percent.'%':null,
             'offer_price_value'=>isset($this->offer)?$this->offer->offer_price_value:null,
             'photos' => $this->formatPhotos(),
             'name' => $this->name,
@@ -25,7 +25,8 @@ class TourResource extends JsonResource
             'additional_data' => json_decode($this->additional_data,true),
             'country'=>$this->country,
             'city'=>$this->city,
-            'street'=>$this->street
+            'street'=>$this->street,
+            'is_favourite'=>$this->checkUserFavourite(),
         ];
     }
 

@@ -23,7 +23,9 @@ class RegisterUser2Request extends FormRequest
             'email'=>'required|email|string|unique:users,email',
             'country'=>'required|string',
             'photo'=>'nullable|image|mimes:jpeg,png,jpg,gif,jfif,svg',
-            'password'=>['required','confirmed',Password::min(8)->numbers()->uncompromised()]
+            'password'=>['required','confirmed',Password::min(8)
+            //->numbers()->uncompromised()
+            ]
         ];
     }
      protected function failedValidation(Validator $validator){

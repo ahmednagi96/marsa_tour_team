@@ -2,6 +2,9 @@
 
 use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\API\HomeController;
+use App\Http\Controllers\API\TourController;
+use App\Http\Controllers\API\TripController;
+use App\Http\Controllers\API\OfferController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -51,5 +54,49 @@ Route::prefix('mobile')->group(function(){
         Route::get('/get-limited-offers', 'limitedOffers')->name('limitedOffers');
         Route::get('/get-all-offers', 'allOffers')->name('allOffers');
     });
+    Route::controller(TripController::class)
+    ->prefix('trips')
+    ->name('api.trips.')
+    ->group(function () {
+        Route::get('/get-tours/{trip}', 'getToursForEachTrip')->name('getToursForEachTrip')->missing(function () {
+            return sendResponse(404,'Trip Not Found',null);
+        })->whereNumber('trip');
+        Route::get('get-cities','getTourCities')->name('getTourCities');
+        Route::get('filter-toursByCity','filterToursByCity')->name('filterToursByCity');
+        Route::get('search-toursByName','searchToursByName')->name('searchToursByName');
+    });
+    Route::controller(TourController::class)
+    ->prefix('tours')
+    ->name('api.tours.')
+    ->group(function () {
+        Route::get('/get-tour/{tour}', 'getTour')
+            ->name('getTour')
+            ->whereNumber('tour')
+            ->missing(function () {
+                return sendResponse(404, 'Tour Not Found', null);
+            });
+        Route::post('/toggle-favouriteTour/{tour}', 'toggleAuthFavourite')
+            ->name('toggleAuthFavourite')
+            ->whereNumber('tour')
+            ->missing(function () {
+                return sendResponse(404, 'Tour Not Found', null);
+            })->middleware('auth:sanctum');
+    });
+    Route::controller(OfferController::class)
+    ->prefix('offers')
+    ->name('api.offers.')
+    ->group(function () {
+        Route::post('/toggle-favouriteOffer/{offer}', 'toggleAuthFavourite')
+            ->name('toggleAuthFavourite')
+            ->whereNumber('offer')
+            ->missing(function () {
+                return sendResponse(404, 'Offer Not Found', null);
+            })->middleware('auth:sanctum');
+    });
 
+});
+Route::get('/test_user',function(){
+    if(auth('sanctum')->check()){
+        return auth('sanctum')->user();
+    }
 });
