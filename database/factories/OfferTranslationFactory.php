@@ -17,7 +17,7 @@ class OfferTranslationFactory extends Factory
     public function definition(): array
     {
         return [
-            ''
+            'offer_name'=>fake()->name()
         ];
     }
 }

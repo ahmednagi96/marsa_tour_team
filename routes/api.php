@@ -1,20 +1,85 @@
 <?php
 
-use App\Http\Controllers\API\AuthController;
-use App\Http\Controllers\API\HomeController;
-use App\Http\Controllers\API\TourController;
-use App\Http\Controllers\API\TripController;
-use App\Http\Controllers\API\OfferController;
-use App\Http\Controllers\API\ProfileController;
+use App\Http\Controllers\Dashboard\ContactusController;
+use App\Http\Controllers\Dashboard\PrivacyController;
+use App\Http\Controllers\Dashboard\SocialController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\OfferControleller;
+use App\Http\Controllers\API\AuthController;
+use App\Http\Controllers\API\HomeController;
+use App\Http\Controllers\Dashboard\TourController;
+use App\Http\Controllers\Dashboard\TripController;
+use App\Http\Controllers\Dashboard\LoginController;
+use App\Http\Controllers\Dashboard\OfferController;
+use App\Http\Controllers\Dashboard\WidgetController;
+
+
 
 
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
+//middleware('auth:sanctum')->
+
+Route::prefix('Dashboard')->group(function(){
+        Route::post('/AdminLogin',[LoginController::class,'login']);
+        Route::post('/register',[LoginController::class,'register']);
+    });
+
+    Route::apiResource('policys',PrivacyController::class)->except('update');
+
+    Route::post('policys/{id}',[PrivacyController::class,'update'])->missing(function(){
+        return sendResponse(404,'not found Policys',null);
+    });
+
+    Route::post('contactus/{id}',[ContactusController::class,'update'])->missing(function(){
+        return sendResponse(404,'not found contactus',null);
+    });
+
+Route::middleware('auth:sanctum')->name('dashboard.')->prefix('Dashboard')->group(function(){
+            Route::get('/Admins',[LoginController::class,'Admins']);
+            Route::delete('/Admins/{id}',[LoginController::class,'delete']);
+
+            Route::post('trips/{trip}',[TripController::class,'update'])->missing(function(){
+            return sendResponse(404,'not found trip',null);
+            });
+            Route::apiResource("trips",TripController::class)->except('update')->missing(function(){
+            return sendResponse(404,'not found trip',null);
+            });
+            Route::get('tours/favourite',[TourController::class,'is_favourite']);
+            Route::post('tours/{id}',[TourController::class,'update'])->missing(function(){
+            return sendResponse(404,'not found trip',null);
+            });
+
+            Route::apiResource("tours",TourController::class)->except('update')->missing(function(){
+            return sendResponse(404,'not found trip',null);
+            });
+            Route::Post("offers/{id}",[OfferController::class,'update'])->missing(function(){
+                return sendResponse(404,'not found trip',null);
+                });
+            Route::apiResource("offers",OfferController::class)->except('update')->missing(function(){
+            return sendResponse(404,'not found trip',null);
+            });
+
+            Route::get('/widget',[WidgetController::class,'widget']);
+
+            Route::get('/counts',[WidgetController::class,'counts']);
+
+            Route::get('/search', [TripController::class, 'search']);
+
+            Route::apiResource('socials',SocialController::class)->except('update');
+
+            Route::post('socials/{id}',[SocialController::class,'update'])->missing(function(){
+                return sendResponse(404,'not found socials',null);
+            });
+
+        });
+
 Route::prefix('mobile')->group(function(){
+
+
     Route::controller(AuthController::class)
     ->middleware('guest:sanctum')
     ->name('api.auth.')
@@ -43,6 +108,7 @@ Route::prefix('mobile')->group(function(){
         });
         Route::get('get-auth-user','getAuthUser')->name('get.auth.user')->withoutMiddleware('guest:sanctum')->middleware('auth:sanctum');
     });
+
     Route::controller(HomeController::class)
     ->prefix('home')
     ->name('api.home.')
@@ -55,65 +121,7 @@ Route::prefix('mobile')->group(function(){
         Route::get('/get-limited-offers', 'limitedOffers')->name('limitedOffers');
         Route::get('/get-all-offers', 'allOffers')->name('allOffers');
     });
-    Route::controller(TripController::class)
-    ->prefix('trips')
-    ->name('api.trips.')
-    ->group(function () {
-        Route::get('/get-tours/{trip}', 'getToursForEachTrip')->name('getToursForEachTrip')->missing(function () {
-            return sendResponse(404,'Trip Not Found',null);
-        })->whereNumber('trip');
-        Route::get('get-cities','getTourCities')->name('getTourCities');
-        Route::get('filter-toursByCity','filterToursByCity')->name('filterToursByCity');
-        Route::get('search-toursByName','searchToursByName')->name('searchToursByName');
-    });
-    Route::controller(TourController::class)
-    ->prefix('tours')
-    ->name('api.tours.')
-    ->group(function () {
-        Route::get('/get-tour/{tour}', 'getTour')
-            ->name('getTour')
-            ->whereNumber('tour')
-            ->missing(function () {
-                return sendResponse(404, 'Tour Not Found', null);
-            });
-        Route::post('/toggle-favouriteTour/{tour}', 'toggleAuthFavourite')
-            ->name('toggleAuthFavourite')
-            ->whereNumber('tour')
-            ->missing(function () {
-                return sendResponse(404, 'Tour Not Found', null);
-            })->middleware('auth:sanctum');
-    });
-    Route::controller(OfferController::class)
-    ->prefix('offers')
-    ->name('api.offers.')
-    ->group(function () {
-        Route::post('/toggle-favouriteOffer/{offer}', 'toggleAuthFavourite')
-            ->name('toggleAuthFavourite')
-            ->whereNumber('offer')
-            ->missing(function () {
-                return sendResponse(404, 'Offer Not Found', null);
-            })->middleware('auth:sanctum');
-    });
-    Route::controller(ProfileController::class)
-    ->prefix('profile')
-    ->name('api.profile.')
-    ->middleware('auth:sanctum')
-    ->group(function () {
-        Route::get('/get-favourite', 'getAuthFavourite')
-            ->name('getAuthFavourite');
-        Route::get('/get-auth', 'index')
-            ->name('index');
-        Route::post('/update', 'update')
-            ->name('update');
-        Route::post('/update-password', 'updatePassword')
-            ->name('updatePassword');
-        Route::delete('/delete-auth', 'delete')
-            ->name('delete');
-    });
 
 });
-Route::get('/test_user',function(){
-    if(auth('sanctum')->check()){
-        return auth('sanctum')->user();
-    }
-});
+
+

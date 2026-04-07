@@ -10,5 +10,10 @@ class TripTranslation extends Model
 
     use HasFactory;
     protected $table="trip_translations";
-    protected $guarded = [];
+    protected $fillable = [
+        "name","description"
+    ];
+    public function tours(){
+        return $this->hasMany(Tour::class,'trip_id');
+    }
 }

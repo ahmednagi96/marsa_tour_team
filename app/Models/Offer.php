@@ -7,8 +7,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Astrotomic\Translatable\Translatable;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-
 class Offer extends Model
 {
     use HasFactory,Translatable;
@@ -48,14 +46,4 @@ class Offer extends Model
     {
         return \Carbon\Carbon::parse($value)->format('d-m-Y H:i:s');
     }
-    public function userFavourite():BelongsToMany{
-        return $this->belongsToMany(User::class,'offer_favourites');
-    }
-    public function checkUserFavourite() {
-        if (auth('sanctum')->check()) {
-          return $this->userFavourite()->where('user_id',auth('sanctum')->id())->exists()?true:false;
-        }
-        return null;
-    }
-
 }

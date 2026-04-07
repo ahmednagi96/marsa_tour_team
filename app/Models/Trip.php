@@ -12,9 +12,9 @@ class Trip extends Model
     use HasFactory,Translatable;
     protected $table="trips";
     protected $fillable=[
-        'photo',
+        'photo','created_at'
     ];
-    public function trip():HasMany
+    public function tours():HasMany
     {
         return $this->hasMany(Tour::class,'trip_id');
     }
