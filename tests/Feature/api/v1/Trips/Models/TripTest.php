@@ -1,20 +1,25 @@
-<?php 
+<?php
+
 use App\Models\Trip;
 
 uses(\Tests\TestCase::class, \Illuminate\Foundation\Testing\RefreshDatabase::class);
 
 test('it can create a trip with translations', function () {
     $trip = Trip::factory()
+
         ->withTranslations([
             'en' => ['name' => 'Luxor Trip'],
             'ar' => ['name' => 'رحلة الأقصر'],
         ])
-        ->create();
+        ->create([
+            'trending'=>1
+        ]);
 
     // 2. Assert: التأكد من وجود الداتا في قاعدة البيانات
     $this->assertDatabaseHas('trips', [
         'id' => $trip->id,
     ]);
+    $this->assertEquals("مشهوره",$trip->trending?->label());
 
     $this->assertDatabaseHas('trip_translations', [
         'trip_id' => $trip->id,

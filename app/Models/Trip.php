@@ -1,13 +1,14 @@
 <?php
 
 namespace App\Models;
+
+use App\Enums\TripTrending;
 use Astrotomic\Translatable\Translatable;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Storage;
 
 /**
  * @property int $id
@@ -45,12 +46,25 @@ class Trip extends BaseModel
     use HasFactory,Translatable;
     protected $table="trips";
     protected $fillable=[
-        'photo','created_at'
+        'photo','created_at','trending'
     ];
+    protected $casts = [
+        'created_at'=>'datetime:d-m-Y H:i:s',
+        'updated_at'=>'datetime:d-m-Y H:i:s',
+        'trending' => TripTrending::class,
+    ];    
     public function tours():HasMany
     {
         return $this->hasMany(Tour::class,'trip_id');
     }
+
+        /** @return Builder */
+        public function scopeTrend(Builder $query,bool $status=false):Builder
+        {
+        return $query->when(filter_var($status, FILTER_VALIDATE_BOOLEAN), function ($q) {
+            $q->where('trending', TripTrending::TRENDING);
+        });
+        }
     protected static function booted()
     {
         // أول ما رحلة تضاف، تتعدل، أو تتحذف
@@ -62,6 +76,26 @@ class Trip extends BaseModel
         static::deleted($clearTripsCache);
     }
     
+    /** @return Builder */
+    public function scopeFilter(Builder $query, ?string $searchTerm): Builder
+    {
+        if (empty($searchTerm)) {
+            return $query;
+        }
+    
+        $words = explode(' ', $searchTerm);
+    
+        return $query->where(function ($q) use ($words) {
+            foreach ($words as $word) {
+                // هنا التغيير: نستخدم where (التي تعمل كـ AND) 
+                // عشان نضمن إن كل كلمة في جملة البحث موجودة فعلياً
+                $q->where(function ($sub) use ($word) {
+                    $sub->whereTranslationLike('name', "%{$word}%")
+                        ->orWhereTranslationLike('description', "%{$word}%");
+                });
+            }
+        });
+    }
     
     public $translatedAttributes=['name','description'];
 

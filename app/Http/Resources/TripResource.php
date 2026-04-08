@@ -14,6 +14,7 @@ class TripResource extends JsonResource
             'id'          => $this->id,
             'name'        => $this->name,
             'description' => $this->description,
+            'trending'    => $this->trending?->label(),
             'photo'       => $this->photo_url,
             'tours'       => $this->mergeWhen(
                 $request->routeIs('dashboard.*'),

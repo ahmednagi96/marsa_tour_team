@@ -14,6 +14,7 @@ class TripFactory extends Factory
         return [
             'photo' => 'trip_' . fake()->numberBetween(1, 10) . '.jpg',
             'created_at' => now(),
+            'trending'=>$this->faker->boolean(50)
         ];
     }
 

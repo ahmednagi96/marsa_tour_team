@@ -1,22 +1,21 @@
 <?php 
-
 namespace App\Traits;
 
 use Illuminate\Support\Facades\Cache;
 
 trait CacheableService
 {
-    /**
-     * تنفيذ الكاش مع التاغز والـ Pagination بشكل ديناميكي
-     */
-    protected function rememberWithTags(string $tag, string $keyIdentifier, callable $callback, int $ttl = 21600)
+
+    /** @return mixed */
+    protected function rememberWithTags(string $tag, string $keyIdentifier, callable $callback, int $ttl = 21600):mixed
     {
-        $page = request('page', 1);
-        $perPage = request('per_page', 15);
         $locale = app()->getLocale();
         
-        // تكوين Key فريد وشامل
-        $cacheKey = "{$tag}_{$keyIdentifier}_{$locale}_p{$page}_l{$perPage}";
+        $cacheKey = "{$tag}:{$keyIdentifier}:{$locale}";
+
+        if (config('cache.default') === 'file' || config('cache.default') === 'database') {
+            return Cache::remember($cacheKey, $ttl, $callback);
+        }
 
         return Cache::tags([$tag])->remember($cacheKey, $ttl, $callback);
     }
