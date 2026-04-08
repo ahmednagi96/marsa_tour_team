@@ -109,19 +109,7 @@ Route::prefix('mobile')->group(function(){
         Route::get('get-auth-user','getAuthUser')->name('get.auth.user')->withoutMiddleware('guest:sanctum')->middleware('auth:sanctum');
     });
 
-    Route::controller(HomeController::class)
-    ->prefix('home')
-    ->name('api.home.')
-    ->group(function () {
-        Route::get('/get-some-trips', 'getSomeTrips')->name('getSomeTrips');
-        Route::get('/get-all-trips', 'getAllTrips')->name('getAllTrips');
-        Route::get('/get-favourite-tours', 'getFavouriteTours')->name('getFavouriteTours');
-        Route::get('/get-all-tours', 'getAllTours')->name('getAllTours');
-        Route::get('/get-banners', 'banners')->name('banners');
-        Route::get('/get-limited-offers', 'limitedOffers')->name('limitedOffers');
-        Route::get('/get-all-offers', 'allOffers')->name('allOffers');
-    });
-
+   
 });
 
 

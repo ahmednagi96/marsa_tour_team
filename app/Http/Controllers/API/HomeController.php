@@ -12,6 +12,7 @@ class HomeController extends Controller
     public function __construct(HomeService $homeService){
         $this->homeService=$homeService;
     }
+    
 
     public function getSomeTrips(){
         try{
@@ -20,7 +21,7 @@ class HomeController extends Controller
             return sendResponse(500,'internal server error !',null);
         }
     }
-    public function getAllTrips(){
+    public function indexTrips(){
         try{
             return sendResponse(200,'All Trips Retrieved Successfully ',$this->homeService->getAllTrips());
         }catch(\Exception $ex){

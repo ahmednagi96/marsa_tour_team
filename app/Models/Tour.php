@@ -8,6 +8,48 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Astrotomic\Translatable\Translatable;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
+/**
+ * @property int $id
+ * @property int $trip_id
+ * @property int $duration
+ * @property string $price
+ * @property bool $is_active
+ * @property bool $is_favourite
+ * @property string|null $photos
+ * @property string|null $video
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \App\Models\Offer|null $offer
+ * @property-read \App\Models\TourTranslation|null $translation
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\TourTranslation> $translations
+ * @property-read int|null $translations_count
+ * @property-read \App\Models\Trip $trip
+ * @method static \Database\Factories\TourFactory factory($count = null, $state = [])
+ * @method static \Illuminate\Database\Eloquent\Builder|Tour listsTranslations(string $translationField)
+ * @method static \Illuminate\Database\Eloquent\Builder|Tour newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|Tour newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|Tour notTranslatedIn(?string $locale = null)
+ * @method static \Illuminate\Database\Eloquent\Builder|Tour orWhereTranslation(string $translationField, $value, ?string $locale = null)
+ * @method static \Illuminate\Database\Eloquent\Builder|Tour orWhereTranslationLike(string $translationField, $value, ?string $locale = null)
+ * @method static \Illuminate\Database\Eloquent\Builder|Tour orderByTranslation(string $translationField, string $sortMethod = 'asc')
+ * @method static \Illuminate\Database\Eloquent\Builder|Tour query()
+ * @method static \Illuminate\Database\Eloquent\Builder|Tour translated()
+ * @method static \Illuminate\Database\Eloquent\Builder|Tour translatedIn(?string $locale = null)
+ * @method static \Illuminate\Database\Eloquent\Builder|Tour whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Tour whereDuration($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Tour whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Tour whereIsActive($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Tour whereIsFavourite($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Tour wherePhotos($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Tour wherePrice($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Tour whereTranslation(string $translationField, $value, ?string $locale = null, string $method = 'whereHas', string $operator = '=')
+ * @method static \Illuminate\Database\Eloquent\Builder|Tour whereTranslationLike(string $translationField, $value, ?string $locale = null)
+ * @method static \Illuminate\Database\Eloquent\Builder|Tour whereTripId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Tour whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Tour whereVideo($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Tour withTranslation(?string $locale = null)
+ * @mixin \Eloquent
+ */
 class Tour extends Model
 {
     use HasFactory,Translatable;

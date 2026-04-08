@@ -17,9 +17,14 @@ class RouteServiceProvider extends ServiceProvider
         $this->configureRateLimiting();
 
         $this->routes(function () {
-            Route::middleware(['api','localeSessionRedirect', 'localizationRedirect', 'localeViewPath'])
+            Route::middleware(['api', 'localizationRedirect', 'localeViewPath'])
                 ->prefix(LaravelLocalization::setLocale().'/api')
                 ->group(base_path('routes/api.php'));
+
+                Route::middleware(['api', 'localizationRedirect', 'localeViewPath'])
+                ->prefix(LaravelLocalization::setLocale().'/api/v1')
+                ->name('v1.')
+                ->group(base_path('routes/api/v1/trips.php'));
 
             Route::middleware('web')
                 ->group(base_path('routes/web.php'));

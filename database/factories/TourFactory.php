@@ -19,7 +19,7 @@ class TourFactory extends Factory
         return [
             "trip_id"=>fake()->numberBetween(1,10),
             "duration"=>fake()->randomDigitNot(0),
-            "price"=>fake()->randomElements([100.00 , 250.00 , 500.00]),
+            "price"=>fake()->randomElement([100.00, 250.00, 500.00]),
             "is_active"=>fake()->boolean(),
             "is_favourite"=>fake()->boolean(),
             "photos"=>fake()->imageUrl(),

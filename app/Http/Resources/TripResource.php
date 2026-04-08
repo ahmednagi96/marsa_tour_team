@@ -10,21 +10,15 @@ class TripResource extends JsonResource
 
     public function toArray(Request $request): array
     {
-        $data= [
-            'id'=>$this->id,
-            'photo'=>is_null($this->photo)?null:BASEURLPHOTO.$this->photo,
-            'name'=>$this->name,
-            'description'=>$this->description,
-            'tours'=>TourResource::collection($this->tours),
-        ];
-        if($request->routeIs('dashboard.*')){
-            return $data;
-        }
-        return  [
-            'id'=>$this->id,
-            'photo'=>is_null($this->photo)?null:BASEURLPHOTO.$this->photo,
-            'name'=>$this->name,
-            'description'=>$this->description,
+        return [
+            'id'          => $this->id,
+            'name'        => $this->name,
+            'description' => $this->description,
+            'photo'       => $this->photo_url,
+            'tours'       => $this->mergeWhen(
+                $request->routeIs('dashboard.*'),
+                fn() => TourResource::collection($this->whenLoaded('tours'))
+            ),
         ];
     }
 }
