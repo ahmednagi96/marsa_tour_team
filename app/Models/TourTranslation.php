@@ -40,5 +40,9 @@ class TourTranslation extends Model
 {
     use HasFactory;
     protected $table="tour_translations";
-    protected $guarded = [];
+    protected $fillable = ['name', 'description', 'country', 'city', 'street', 'services', 'additional_data'];
+    protected $casts = [
+        'services' => 'json',
+        'additional_data' => 'json',
+    ];
 }

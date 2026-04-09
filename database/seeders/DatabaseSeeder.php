@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
+use App\Models\Tour;
 use App\Models\Trip;
 use Illuminate\Database\Seeder;
 
@@ -14,6 +15,7 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        Trip::factory()->count(10)->create();
+        //Trip::factory()->count(10)->create();
+        Tour::factory()->create();
     }
 }

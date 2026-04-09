@@ -2,11 +2,13 @@
 
 namespace App\Models;
 
+use App\Observers\TourObserver;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Astrotomic\Translatable\Translatable;
-use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 
 /**
  * @property int $id
@@ -50,68 +52,111 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  * @method static \Illuminate\Database\Eloquent\Builder|Tour withTranslation(?string $locale = null)
  * @mixin \Eloquent
  */
+#[ObservedBy([TourObserver::class])]
 class Tour extends Model
 {
-    use HasFactory,Translatable;
+    use HasFactory, Translatable;
 
-    protected $table="tours";
-    protected $fillable=[
-        'trip_id',
-        'duration',
-        'price',
-        'is_active',
-        'is_favourite',
-        'photos',
-        'video'
+    protected $table = "tours";
+    protected $fillable = [
+        "trip_id",
+        "duration",
+        "price",
+        "discount_type",
+        "discount_value",
+        "sale_price",
+        "sale_start",
+        "sale_end",
+        "is_active",
+        "is_favourite",
+        "photos",
+        "video",
+
     ];
 
-    public function trip():BelongsTo
+    /** @return BelongsTo */
+    public function trip(): BelongsTo
     {
-        return $this->belongsTo(Trip::class,'trip_id')->withDefault(['name'=>"Not Found"]);
+        return $this->belongsTo(Trip::class, 'trip_id')->withDefault(['name' => "Not Found"]);
+    }
 
-    }
-    public function offer():HasOne
-    {
-        return $this->hasOne(Offer::class,'tour_id');
-    }
     protected $casts = [
-        'created_at'=>'datetime:d-m-Y H:i:s',
-        'updated_at'=>'datetime:d-m-Y H:i:s',
-        'is_active'=>'boolean',
-        'is_favourite'=>'boolean',
-        'price'=>'decimal:2'
+        'created_at' => 'datetime:d-m-Y H:i:s',
+        'updated_at' => 'datetime:d-m-Y H:i:s',
+        'is_active' => 'boolean',
+        'is_favourite' => 'boolean',
+        'price' => 'decimal:2',
+         'photos' => 'json',
     ];
-    protected $with=['translations'];
-    protected $hidden=['translations'];
-    public $translatedAttributes=['name','description','country','city','street','services','additional_data'];
+    public $translatedAttributes = ['name', 'description', 'country', 'city', 'street', 'services', 'additional_data'];
 
-    public function getHomeData(){
-        return [
-            'id' => $this->id,
-            'trip_id' => $this->trip_id,
-            'trip_name' => $this->trip->name,
-            'duration'=>$this->duration,
-            'price'=>$this->price,
-            'offer_price_percent'=>isset($this->offer)?$this->offer->offer_price_percent:null,
-            'offer_price_value'=>isset($this->offer)?$this->offer->offer_price_value:null,
-            'photos' =>is_null($this->photos)?null:BASEURLPHOTO.json_decode($this->photos,true)[0],
-            'name' => $this->name,
-            'country'=>$this->country,
-            'city'=>$this->city,
-            'street'=>$this->street
-        ];
-    }
-    public function formatPhotos()
+    /**
+     * الـ Logic المركزي لحساب السعر النهائي
+     * وضعناه في ميثود منفصلة عشان نستخدمها في كذا مكان (DRY)
+     */
+    /** @return float */
+    public function getCalculatedSalePrice(): float
     {
-        if (is_null($this->photos)) {
-            return null;
+        if ($this->discount_value > 0) {
+            if ($this->discount_type === 'percentage') {
+                return (float) ($this->price - ($this->price * ($this->discount_value / 100)));
+            }
+            return (float) max(0, $this->price - $this->discount_value);
         }
-        $photosArray = json_decode($this->photos, true);
-        if (is_array($photosArray)) {
-            return array_map(function ($photo) {
-                return BASEURLPHOTO . $photo;
-            }, $photosArray);
+        return (float) $this->price;
+    }
+
+
+    /**
+     * الـ Accessor السحري
+     * ده اللي الـ API هيستخدمه لعرض السعر الحقيقي لليوزر حالاً
+     * بيظهر في الـ JSON كـ current_price
+     */
+    public function getCurrentPriceAttribute(): float
+    {
+        $now = now();
+
+        // هل الخصم فعال وصالح للاستخدام "دلوقتي"؟
+        if (
+            $this->discount_value > 0 &&
+            $this->sale_start && $this->sale_end &&
+            $now->between($this->sale_start, $this->sale_end)
+        ) {
+
+            return (float) $this->sale_price;
         }
-        return null;
+
+        // لو التاريخ انتهى أو لسه م بدأش، ارجع للسعر الأصلي
+        return (float) $this->price;
+    }
+
+    /**
+     * ميثود إضافية بتعرفك لو الرحلة عليها عرض "شغال" حالياً
+     */
+    public function getIsOnSaleAttribute(): bool
+    {
+        return $this->current_price < $this->price;
+    }
+
+
+    /**
+     * ميثود إضافية لمعرفة "مبلغ الخصم" نفسه (كام جنيه توفير؟)
+     */
+    public function getSavedAmountAttribute()
+    {
+        return $this->price - $this->current_price;
+    }
+
+    public function photos(): Attribute
+    {
+        return Attribute::make(
+            get: fn($photos) => fn($photo) => asset("images/tours/photos/" . $photo),
+        );
+    }
+    public function video(): Attribute
+    {
+        return Attribute::make(
+            get: fn($video) =>  asset("images/tours/videos/" . $video)
+        );
     }
 }
