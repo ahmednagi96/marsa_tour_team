@@ -2,6 +2,8 @@
 
 return [
     'trips_retrieved' => 'تم استرجاع الرحلات بنجاح.',
+    'tours_retrieved' => 'تم استرجاع الجولات بنجاح.',
+    "trip_retrieved"=>"تم استرجاع الرحلة بنجاح",
     'trending_trips_retrieved' => 'تم استرجاع الرحلات المشهورة بنجاح.',
     'trip_not_found'  => 'الرحلة غير موجودة.',
     'success_operation' => 'تمت العملية بنجاح',

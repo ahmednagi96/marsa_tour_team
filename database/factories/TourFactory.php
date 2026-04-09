@@ -29,8 +29,8 @@ class TourFactory extends Factory
             'is_active'      => true,
             'is_favourite'   => $this->faker->numberBetween(1, 5) === 1,
             'photos'         => [
-                'default-1.jpg',
-                'default-2.jpg',
+                        'default-1.jpg',
+                        'default-2.jpg',
             ],
             'video'          => 'dQw4w9WgXcQ',
         ];
@@ -50,6 +50,7 @@ class TourFactory extends Factory
                 'city'        => 'القاهرة',
                 'description' => 'هذا الوصف تجريبي لرحلة سياحية رائعة تشمل كافة الخدمات.',
                 'services'    => ['وايفاي', 'انتقالات', 'وجبة غداء'],
+                'additional_data'=>['داتا 3','داتا 2','داتا 1']
             ]);
 
             // بيانات إنجليزي
@@ -60,6 +61,7 @@ class TourFactory extends Factory
                 'city'        => 'Cairo',
                 'description' => 'This is a fake description for a wonderful tour with all services included.',
                 'services'    => ['WiFi', 'Transfer', 'Lunch'],
+                'additional_data'=>['data1','data 2','data 3']
             ]);
         });
     }

@@ -1,50 +1,50 @@
-<?php 
-
+<?php
 
 namespace App\Traits;
 
+use Illuminate\Auth\AuthenticationException;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Http\Exceptions\ThrottleRequestsException;
+use Illuminate\Validation\ValidationException;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Throwable;
+
 trait HandleException
 {
-    public function handleApiExceptions(\Throwable $e)
+    use ApiResponse;
+
+    public function handleApiExceptions(Throwable $e): JsonResponse
     {
-        // 1. تحديد الـ Status Code
         $status = match (true) {
-            $e instanceof \Illuminate\Validation\ValidationException => 422,
-            $e instanceof \Illuminate\Http\Exceptions\ThrottleRequestsException => 429,
-            $e instanceof \Symfony\Component\HttpKernel\Exception\NotFoundHttpException => 404,
-            $e instanceof \Illuminate\Auth\AuthenticationException => 401,
+            $e instanceof ValidationException => 422,
+            $e instanceof ThrottleRequestsException => 429,
+            $e instanceof ModelNotFoundException => 404,
+            $e instanceof AuthenticationException => 401,
             default => 500
         };
 
-        // 2. تجهيز الأخطاء (Errors Payload)
-        $errors = null;
-        if ($e instanceof \Illuminate\Validation\ValidationException) {
-            $errors = $e->errors();
-        } elseif ($status == 429) {
-            $errors = ['wait' => 'يرجى المحاولة لاحقاً'];
-        }
+        // تجهيز الأخطاء (Errors Payload)
+        $errors = ($e instanceof ValidationException) ? $e->errors() : null;
 
-        // 3. صياغة الرسالة
+        // صياغة الرسالة باستخدام Localization
         $message = match ($status) {
-            422 => 'البيانات المرسلة غير صحيحة',
-            // 429 => 'طلبات كثيرة جداً، اهدى شوية!',
-            404 => 'المورد غير موجود',
-            401 => 'غير مصرح لك بالدخول',
-            500 => config('app.debug') ? $e->getMessage() : 'خطأ داخلي في السيرفر',
+            422 => __('exceptions.validation_error'),
+            404 => __('exceptions.not_found'),
+            401 => __('exceptions.unauthenticated'),
+            429 => $e instanceof ThrottleRequestsException
+                ? $this->getThrottleMessage($e)
+                : __('exceptions.throttle', ['seconds' => 60]),
+            500 => config('app.debug') ? $e->getMessage() : __('exceptions.server_error'),
             default => $e->getMessage(),
         };
-        if ($e instanceof \Illuminate\Http\Exceptions\ThrottleRequestsException) {
-            $seconds = $e->getHeaders()['Retry-After'] ?? 60;
-            $message = "يرجى الانتظار {$seconds} ثانية قبل المحاولة مرة أخرى";
-        }
 
-        // 4. الرد الموحد "الأسطوري"
-        return response()->json([
-            'success'     => false,
-            'status_code' => $status,
-            'message'     => $message,
-            'data'        => null,
-            'errors'      => $errors,
-        ], $status);
+        return $this->error($message, $status, $errors);
+    }
+
+    private function getThrottleMessage(ThrottleRequestsException $e): string
+    {
+        $seconds = $e->getHeaders()['Retry-After'] ?? 60;
+
+        return __('api.exceptions.throttle', ['seconds' => $seconds]);
     }
 }

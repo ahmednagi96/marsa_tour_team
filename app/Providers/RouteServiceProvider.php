@@ -24,7 +24,7 @@ class RouteServiceProvider extends ServiceProvider
                 Route::middleware(['api', 'localizationRedirect', 'localeViewPath'])
                 ->prefix(LaravelLocalization::setLocale().'/api/v1')
                 ->name('v1.')
-                ->group(base_path('routes/api/v1/trips.php'));
+                ->group(base_path('routes/api/v1/travel.php'));
 
             Route::middleware('web')
                 ->group(base_path('routes/web.php'));

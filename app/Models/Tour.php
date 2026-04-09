@@ -3,12 +3,14 @@
 namespace App\Models;
 
 use App\Observers\TourObserver;
+use Astrotomic\Translatable\Translatable;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Astrotomic\Translatable\Translatable;
-use Illuminate\Database\Eloquent\Attributes\ObservedBy;
-use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Support\Facades\Cache;
 
 /**
  * @property int $id
@@ -86,7 +88,7 @@ class Tour extends Model
         'is_active' => 'boolean',
         'is_favourite' => 'boolean',
         'price' => 'decimal:2',
-         'photos' => 'json',
+        'photos' => 'json',
     ];
     public $translatedAttributes = ['name', 'description', 'country', 'city', 'street', 'services', 'additional_data'];
 
@@ -147,16 +149,54 @@ class Tour extends Model
         return $this->price - $this->current_price;
     }
 
-    public function photos(): Attribute
+   
+    protected static function booted()
     {
-        return Attribute::make(
-            get: fn($photos) => fn($photo) => asset("images/tours/photos/" . $photo),
-        );
+        // أول ما رحلة تضاف، تتعدل، أو تتحذف
+        $clearTripsCache = function () {
+            Cache::tags(['tours'])->flush(); 
+        };
+        static::created($clearTripsCache);
+        static::updated($clearTripsCache);
+        static::deleted($clearTripsCache);
     }
-    public function video(): Attribute
+
+
+    //search
+
+
+    /** @return Builder */
+    public function scopeFilter(Builder $query, ?string $searchTerm): Builder
     {
-        return Attribute::make(
-            get: fn($video) =>  asset("images/tours/videos/" . $video)
-        );
+        if (empty($searchTerm)) {
+            return $query;
+        }
+
+        $words = explode(' ', $searchTerm);
+
+        return $query->where(function ($q) use ($words) {
+            foreach ($words as $word) {
+                $q->where(function ($sub) use ($word) {
+                    $sub->whereTranslationLike('name', "%{$word}%")
+                        ->orWhereTranslationLike('description', "%{$word}%")
+                        ->orWhereTranslationLike('city', "%{$word}%")
+                        ->orWhereTranslationLike('street', "%{$word}%")
+                        ->orWhereTranslationLike('country', "%{$word}%");
+                });
+            }
+        });
+    }
+
+    public function scopeActive(Builder $query, bool $status = false): Builder
+    {
+        return $query->when(filter_var($status, FILTER_VALIDATE_BOOLEAN), function ($q) {
+            return $q->where("is_active", 1);
+        });
+    }
+    public function scopeFavourite(Builder $query, bool $status = false): Builder
+    {
+        return $query->when(filter_var($status, FILTER_VALIDATE_BOOLEAN), function ($q) {
+            return $q->where("is_favourite", 1);
+        });
     }
 }

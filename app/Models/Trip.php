@@ -43,48 +43,53 @@ use Illuminate\Support\Facades\Cache;
 class Trip extends BaseModel
 {
 
-    use HasFactory,Translatable;
-    protected $table="trips";
-    protected $fillable=[
-        'photo','created_at','trending'
+    use HasFactory, Translatable;
+    protected $table = "trips";
+    protected $fillable = [
+        'photo',
+        'created_at',
+        'trending'
     ];
     protected $casts = [
-        'created_at'=>'datetime:d-m-Y H:i:s',
-        'updated_at'=>'datetime:d-m-Y H:i:s',
+        'created_at' => 'datetime:d-m-Y H:i:s',
+        'updated_at' => 'datetime:d-m-Y H:i:s',
         'trending' => TripTrending::class,
-    ];    
-    public function tours():HasMany
+    ];
+    public function tours(): HasMany
     {
-        return $this->hasMany(Tour::class,'trip_id');
+        return $this->hasMany(Tour::class, 'trip_id');
     }
-
-        /** @return Builder */
-        public function scopeTrend(Builder $query,bool $status=false):Builder
-        {
-        return $query->when(filter_var($status, FILTER_VALIDATE_BOOLEAN), function ($q) {
-            $q->where('trending', TripTrending::TRENDING);
+    /** 
+     * جلب الرحلات التريند
+     * استخدام: Trip::trend()->get()
+     * @return Builder 
+     */
+    public function scopeTrend(Builder $query, ?bool $status = null): Builder
+    {
+        return $query->when(!is_null($status),function ($q) use ($status) {
+             return $q->where('trending', $status);
         });
-        }
+    }
     protected static function booted()
     {
         // أول ما رحلة تضاف، تتعدل، أو تتحذف
         $clearTripsCache = function () {
-            Cache::tags(['trips'])->flush(); 
+            Cache::tags(['trips'])->flush();
         };
         static::created($clearTripsCache);
         static::updated($clearTripsCache);
         static::deleted($clearTripsCache);
     }
-    
+
     /** @return Builder */
     public function scopeFilter(Builder $query, ?string $searchTerm): Builder
     {
         if (empty($searchTerm)) {
             return $query;
         }
-    
+
         $words = explode(' ', $searchTerm);
-    
+
         return $query->where(function ($q) use ($words) {
             foreach ($words as $word) {
                 // هنا التغيير: نستخدم where (التي تعمل كـ AND) 
@@ -96,8 +101,8 @@ class Trip extends BaseModel
             }
         });
     }
-    
-    public $translatedAttributes=['name','description'];
+
+    public $translatedAttributes = ['name', 'description'];
 
     /**
      * Get the trip's photo full URL.
@@ -106,10 +111,9 @@ class Trip extends BaseModel
     protected function photoUrl(): Attribute
     {
         return Attribute::make(
-            get: fn () => $this->photo 
-                ? asset('images/trips/' . $this->photo) 
-                : asset('images/default.jpeg'), 
+            get: fn() => $this->photo
+                ? asset('images/trips/' . $this->photo)
+                : asset('images/default.jpeg'),
         );
     }
-
 }

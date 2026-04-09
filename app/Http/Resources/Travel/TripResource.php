@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Resources;
+namespace App\Http\Resources\Travel;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -16,10 +16,7 @@ class TripResource extends JsonResource
             'description' => $this->description,
             'trending'    => $this->trending?->label(),
             'photo'       => $this->photo_url,
-            'tours'       => $this->mergeWhen(
-                $request->routeIs('dashboard.*'),
-                fn() => TourResource::collection($this->whenLoaded('tours'))
-            ),
+            'tours'       => TourResource::collection($this->whenLoaded('tours'))
         ];
     }
 }
