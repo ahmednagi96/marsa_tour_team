@@ -1,5 +1,6 @@
 <?php
 
+use App\Traits\CacheableService;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -14,3 +15,12 @@ use Illuminate\Support\Facades\Route;
 */
 
 
+
+class TestTag{
+    use CacheableService;
+
+    public function index(){
+        return $this->rememberWithTags("test_tags","test",fn()=>[1,2,3]);
+    }
+}
+Route::get("/test-tag",[TestTag::class,"index"]);

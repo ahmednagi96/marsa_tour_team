@@ -16,6 +16,9 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         //Trip::factory()->count(10)->create();
-        Tour::factory()->create();
+        //Tour::factory()->create();
+        $tour=Tour::find(1);
+        $tour->update(['photos'=>null]);
+
     }
 }

@@ -72,12 +72,10 @@ class Trip extends BaseModel
     }
     protected static function booted()
     {
-        // أول ما رحلة تضاف، تتعدل، أو تتحذف
         $clearTripsCache = function () {
             Cache::tags(['trips'])->flush();
         };
-        static::created($clearTripsCache);
-        static::updated($clearTripsCache);
+        static::saved($clearTripsCache);
         static::deleted($clearTripsCache);
     }
 

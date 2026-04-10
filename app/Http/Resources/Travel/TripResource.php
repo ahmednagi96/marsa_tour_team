@@ -16,7 +16,7 @@ class TripResource extends JsonResource
             'description' => $this->description,
             'trending'    => $this->trending?->label(),
             'photo'       => $this->photo_url,
-            'tours'       => TourResource::collection($this->whenLoaded('tours'))
+            'tours'       => TourListResource::collection($this->whenLoaded('tours'))
         ];
     }
 }

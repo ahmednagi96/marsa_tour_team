@@ -76,6 +76,9 @@ class Tour extends Model
 
     ];
 
+    
+    protected $touches = ['trip']; // اسم العلاقة اللي في الموديل
+
     /** @return BelongsTo */
     public function trip(): BelongsTo
     {
@@ -160,7 +163,6 @@ class Tour extends Model
         static::updated($clearTripsCache);
         static::deleted($clearTripsCache);
     }
-
 
     //search
 

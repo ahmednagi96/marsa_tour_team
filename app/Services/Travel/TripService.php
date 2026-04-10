@@ -32,7 +32,7 @@ class TripService
     
         return $this->rememberWithTags('trips', $cacheKey, function ()use ($id){
             return Trip::query()
-                ->with(['translations','tours'])
+                ->with(['translations','tours','tours.trip'])
                 ->findOrFail($id);
         });
     }

@@ -35,5 +35,5 @@ class TripController extends BaseController
         $data = new TripResource($trip);
         return $this->success($data, __('messages.trip_retrieved'));
     }
-   
+  
 }
