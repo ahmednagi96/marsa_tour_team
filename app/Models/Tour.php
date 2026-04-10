@@ -188,17 +188,28 @@ class Tour extends Model
             }
         });
     }
+ /** 
+     * جلب الرحلات التريند
+     * استخدام: Tour::active()->get()
+     * @return Builder 
+     */
+    public function scopeActive(Builder $query, ?bool $status = null): Builder
+    {
+        return $query->when(!is_null($status),function ($q) use ($status) {
+             return $q->where('is_active', $status);
+        });
+    }
+    public function scopeFavourite(Builder $query, ?bool $status = null): Builder
+    {
+        return $query->when(!is_null($status),function ($q) use ($status) {
+            return $q->where('is_favourite', $status);
+       });
+    }
 
-    public function scopeActive(Builder $query, bool $status = false): Builder
-    {
-        return $query->when(filter_var($status, FILTER_VALIDATE_BOOLEAN), function ($q) {
-            return $q->where("is_active", 1);
-        });
+    public function scopeDiscountTours(Builder $query,?bool $status = null){
+        return $query->when(!is_null($status),function ($q) use ($status) {
+            return $status ? $q->whereColumn('sale_price', '<', 'price') : $q->whereColumn('sale_price',"=",'price');
+       });
     }
-    public function scopeFavourite(Builder $query, bool $status = false): Builder
-    {
-        return $query->when(filter_var($status, FILTER_VALIDATE_BOOLEAN), function ($q) {
-            return $q->where("is_favourite", 1);
-        });
-    }
+    
 }

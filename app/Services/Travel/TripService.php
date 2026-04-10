@@ -2,6 +2,7 @@
 
 namespace App\Services\Travel;
 
+use App\Models\Tour;
 use App\Models\Trip;
 use App\Traits\CacheableService;
 
@@ -34,6 +35,23 @@ class TripService
             return Trip::query()
                 ->with(['translations','tours','tours.trip'])
                 ->findOrFail($id);
+        });
+    }
+    public function getCachedTripToursById(int $id, array $validatedData)
+    {
+        ksort($validatedData);
+        $filterHash = md5(json_encode($validatedData));
+        $cacheKey = "trip_show_{$id}_tours_{$filterHash}" ;
+        return $this->rememberWithTags('trips', $cacheKey, function () use ($id,$validatedData){
+            return Tour::query()
+                    ->where("trip_id",$id)
+                    ->with(['translations','trip'])
+                    ->filter($validatedData['search'] ?? null)      
+                    ->active($validatedData['active'] ?? null)
+                    ->favourite($validatedData['favourite'] ?? null)
+                    ->discountTours($validatedData['discounts'] ?? null)
+                    ->latest()
+                    ->paginate($validatedData['per_page'] ?? 15);
         });
     }
 }

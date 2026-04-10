@@ -9,7 +9,7 @@ Route::controller(TripController::class)->as("trips.")
       // Trips
       Route::get('/trips',  'index')->name('index');
       Route::get('/trips/{trip:id}',"show");
-      Route::get('/trips/{trip:id}/tours');
+      Route::get('/trips/{trip:id}/tours',"tours");
       Route::get('/trips/{trip:id}/tours/{tour:id}');
 
    });

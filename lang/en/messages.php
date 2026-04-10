@@ -4,6 +4,7 @@ return [
         'trips_retrieved' => 'Trips retrieved successfully.',
         'tours_retrieved' => 'Tours retrieved successfully.',
         "trip_retrieved"=>"Trip Retrieved",
+        "trip_tours_retrieved"=>"tours of trip retrieved successfully.",
         'trending_trips_retrieved' => 'Trending trips retrieved successfully.',
         'trip_not_found'  => 'Trip not found.',
         'success_operation' => 'Operation completed successfully',

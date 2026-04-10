@@ -20,8 +20,9 @@ class TourService
             return Tour::query()
                 ->with(['translations','trip'])
                 ->filter($filters['search'] ?? null)      
-                ->active($filters['active'] ?? false)
-                ->favourite($filters['favourite'] ?? false)
+                ->active($filters['active'] ?? null)
+                ->favourite($filters['favourite'] ?? null)
+                ->discountTours($filters['discounts'] ?? null)
                 ->latest()
                 ->paginate($filters['per_page'] ?? 15);
         });
