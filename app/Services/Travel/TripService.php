@@ -26,15 +26,12 @@ class TripService
                 ->paginate($validatedData['per_page'] ?? 15);
         });
     }
-    public function getCachedTripById(int $id)
+    public function getCachedTripById(Trip $trip)
     {
         
-        $cacheKey = "trip_show_{$id}" ;
-    
-        return $this->rememberWithTags('trips', $cacheKey, function ()use ($id){
-            return Trip::query()
-                ->with(['translations','tours','tours.trip'])
-                ->findOrFail($id);
+        $cacheKey = "trip_show_{$trip->id}" ;
+        return $this->rememberWithTags('trips', $cacheKey, function ()use ($trip){
+            return $trip->load(['translations','tours','tours.trip']);
         });
     }
     public function getCachedTripToursById(int $id, array $validatedData)
@@ -52,6 +49,15 @@ class TripService
                     ->discountTours($validatedData['discounts'] ?? null)
                     ->latest()
                     ->paginate($validatedData['per_page'] ?? 15);
+        });
+    }
+
+    public function getCachedTripTourById(Trip $trip,Tour $tour)
+    {
+        $cacheKey = "trip_show_{$trip->id}_tour_{$tour->id}" ;
+    
+        return $this->rememberWithTags('trips', $cacheKey, function () use($tour){
+            return $tour->load(['translations', 'trip']);
         });
     }
 }

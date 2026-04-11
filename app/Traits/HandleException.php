@@ -8,6 +8,7 @@ use Illuminate\Http\Exceptions\ThrottleRequestsException;
 use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Throwable;
+use Illuminate\Support\Str;
 
 trait HandleException
 {
@@ -15,6 +16,7 @@ trait HandleException
 
     public function handleApiExceptions(Throwable $e): JsonResponse
     {
+        // 1. تحديد الـ HTTP Status Code
         $status = match (true) {
             $e instanceof ValidationException => 422,
             $e instanceof ThrottleRequestsException => 429,
@@ -23,28 +25,67 @@ trait HandleException
             default => 500
         };
 
-        // تجهيز الأخطاء (Errors Payload)
+        // 2. تجهيز الأخطاء (في حالة الـ Validation فقط)
         $errors = ($e instanceof ValidationException) ? $e->errors() : null;
 
-        // صياغة الرسالة باستخدام Localization
+        // 3. صياغة الرسالة النهائية
         $message = match ($status) {
             422 => __('exceptions.validation_error'),
-            404 => __('exceptions.not_found'),
+            
+            // تعديل الـ 404 لجلب رسالة ذكية ومترجمة
+            404 => $e instanceof ModelNotFoundException 
+                ? $this->getFriendlyModelNotFoundMessage($e) 
+                : __('exceptions.not_found'),
+                
             401 => __('exceptions.unauthenticated'),
+            
             429 => $e instanceof ThrottleRequestsException
                 ? $this->getThrottleMessage($e)
                 : __('exceptions.throttle', ['seconds' => 60]),
+                
+            // في حالة الـ Server Error (500) بنظهر الخطأ الحقيقي فقط في وضع الـ Debug
             500 => config('app.debug') ? $e->getMessage() : __('exceptions.server_error'),
+            
             default => $e->getMessage(),
         };
 
         return $this->error($message, $status, $errors);
     }
 
+    /**
+     * استخراج رسالة خطأ صديقة للمستخدم عند عدم وجود موديل (404)
+     */
+    private function getFriendlyModelNotFoundMessage(ModelNotFoundException $e): string
+    {
+        // إذا كان هناك رسالة مخصصة تم تمريرها يدوياً (مثلاً في findOrFail("Message"))
+        if (!empty($e->getMessage()) && !str_contains($e->getMessage(), 'No query results')) {
+            return $e->getMessage();
+        }
+
+        // استخراج اسم الموديل من المسار (App\Models\Tour -> Tour)
+        $modelPath = $e->getModel();
+        $modelName = class_basename($modelPath);
+
+        // محاولة ترجمة اسم الموديل من ملف الـ Translation
+        // تأكد من وجود ملف lang/ar/models.php يحتوي على: 'Tour' => 'الجولة'
+        $translatedModel = __("models.$modelName");
+
+        // إذا لم توجد ترجمة لاسم الموديل، استخدم الاسم كما هو
+        if ($translatedModel === "models.$modelName") {
+            $translatedModel = $modelName;
+        }
+
+        return __('exceptions.model_not_found', ['model' => $translatedModel]);
+    }
+
+    /**
+     * حساب الوقت المتبقي لمحاولات تسجيل الدخول أو الـ API Rate Limit
+     */
     private function getThrottleMessage(ThrottleRequestsException $e): string
     {
-        $seconds = $e->getHeaders()['Retry-After'] ?? 60;
+        $headers = $e->getHeaders();
+        $seconds = $headers['Retry-After'] ?? 60;
 
-        return __('api.exceptions.throttle', ['seconds' => $seconds]);
+        return __('exceptions.throttle', ['seconds' => $seconds]);
     }
 }

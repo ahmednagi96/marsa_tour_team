@@ -10,7 +10,7 @@ Route::controller(TripController::class)->as("trips.")
       Route::get('/trips',  'index')->name('index');
       Route::get('/trips/{trip:id}',"show");
       Route::get('/trips/{trip:id}/tours',"tours");
-      Route::get('/trips/{trip:id}/tours/{tour:id}');
+      Route::get('/trips/{trip:id}/tours/{tour:id}',"tripTour")->scopeBindings();
 
    });
 Route::controller(TourController::class)->as('tours.')

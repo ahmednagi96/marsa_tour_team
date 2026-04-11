@@ -7,6 +7,7 @@ use App\Http\Requests\API\Travel\TourRequest;
 use App\Http\Requests\API\Travel\TripRequest;
 use App\Http\Resources\Travel\TourListResource;
 use App\Http\Resources\Travel\TripResource;
+use App\Models\Tour;
 use App\Models\Trip;
 use App\Services\Travel\TripService;
 use Illuminate\Http\JsonResponse;
@@ -33,7 +34,7 @@ class TripController extends BaseController
      *  @return JsonResponse */
     public function show(Trip $trip):JsonResponse
     {
-        $trip = $this->tripService->getCachedTripById($trip->id);
+        $trip = $this->tripService->getCachedTripById($trip);
         $data = new TripResource($trip);
         return $this->success($data, __('messages.trip_retrieved'));
     }
@@ -46,6 +47,14 @@ class TripController extends BaseController
         $tripTours = $this->tripService->getCachedTripToursById($trip->id,$filters);
         $data =TourListResource::collection($tripTours)->response()->getData(true);
         return $this->success($data, __('messages.trip_tours_retrieved'));
+    }
+    
+
+    public function tripTour(Trip $trip,Tour $tour):JsonResponse
+    {
+        $tour =$this->tripService->getCachedTripTourById($trip,$tour);
+        $data = new TripResource($tour);
+        return $this->success($data, __('messages.trip_tour_retrieved'));
     }
   
 }
