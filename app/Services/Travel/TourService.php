@@ -9,22 +9,29 @@ class TourService
 {
     use CacheableService;
 
-    public function getCachedTours()
+    public function getCachedTours(array $validatedData)
     {
-        $filters = request()->only(['search', 'active', 'favourite',"discounts",'per_page', 'page']);
-        
-        $filterHash = md5(json_encode($filters));
-        $cacheKey = "list_" . $filterHash;
-    
-        return $this->rememberWithTags('tours', $cacheKey, function () use ($filters){
+        ksort($validatedData);
+        $filterHash = md5(json_encode($validatedData));
+        $cacheKey = "list_tours_" . $filterHash;
+        return $this->rememberWithTags('tours', $cacheKey, function () use ($validatedData) {
             return Tour::query()
-                ->with(['translations','trip'])
-                ->filter($filters['search'] ?? null)      
-                ->active($filters['active'] ?? null)
-                ->favourite($filters['favourite'] ?? null)
-                ->discountTours($filters['discounts'] ?? null)
+                ->with(['translations', 'trip'])
+                ->filter($validatedData['search'] ?? null)
+                ->active($validatedData['active'] ?? null)
+                ->favourite($validatedData['favourite'] ?? null)
+                ->discountTours($validatedData['discounts'] ?? null)
                 ->latest()
-                ->paginate($filters['per_page'] ?? 15);
+                ->paginate($validatedData['per_page'] ?? 15);
+        });
+    }
+
+
+    public function getCachedTourById(Tour $tour)
+    {
+        $cacheKey = "tour_show_{$tour->id}";
+        return $this->rememberWithTags('trips', $cacheKey, function () use ($tour) {
+            return $tour->load(['translations', 'trip']);
         });
     }
 }

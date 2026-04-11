@@ -15,7 +15,7 @@ class TripService
         
         ksort($validatedData);
         $filterHash = md5(json_encode($validatedData));
-        $cacheKey = "list_" . $filterHash;
+        $cacheKey = "list_trips_" . $filterHash;
     
         return $this->rememberWithTags('trips', $cacheKey, function () use ($validatedData){
             return Trip::query()

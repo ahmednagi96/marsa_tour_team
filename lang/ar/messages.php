@@ -3,6 +3,7 @@
 return [
     'trips_retrieved' => 'تم استرجاع الرحلات بنجاح.',
     'tours_retrieved' => 'تم استرجاع الجولات بنجاح.',
+    'tour_retrieved' => 'تم استرجاع الجوله بنجاح.',
     "trip_retrieved"=>"تم استرجاع الرحلة بنجاح",
     "trip_tours_retrieved"=>"تم استرجاع رحلات الجوله بنجاح",
     "trip_tour_retrieved"=>"تم استرجاع رحله الجوله بنجاح",

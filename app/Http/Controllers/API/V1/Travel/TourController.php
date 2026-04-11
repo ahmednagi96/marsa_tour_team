@@ -3,7 +3,10 @@
 namespace App\Http\Controllers\API\V1\Travel;
 
 use App\Http\Controllers\API\BaseController;
+use App\Http\Requests\API\Travel\TourRequest;
 use App\Http\Resources\Travel\TourListResource;
+use App\Http\Resources\Travel\TourResource;
+use App\Models\Tour;
 use App\Services\Travel\TourService;
 use App\Traits\ApiResponse;
 use Illuminate\Http\JsonResponse;
@@ -13,11 +16,22 @@ class TourController extends BaseController
     use ApiResponse;
     public function __construct(protected TourService $tourService) {}
 
-    public function index():JsonResponse
+    public function index(TourRequest $request): JsonResponse
     {
-        $tours = $this->tourService->getCachedTours();
+        $filters = $request->validated();
+        $tours = $this->tourService->getCachedTours($filters);
         $data = TourListResource::collection($tours)->response()->getData(true);
         return $this->success($data, __('messages.tours_retrieved'));
+    }
+    
+      /**
+     * @param  Tour $tour
+     *  @return JsonResponse */
+    public function show(Tour $tour):JsonResponse
+    {
+        $trip = $this->tourService->getCachedTourById($tour);
+        $data = new TourResource($trip);
+        return $this->success($data, __('messages.tour_retrieved'));
     }
    
 }

@@ -16,7 +16,6 @@ Route::controller(TripController::class)->as("trips.")
 Route::controller(TourController::class)->as('tours.')
    ->group(function () {
       Route::get("/tours", "index")->name("index");
-      Route::get("/tours/{tour:id}")->name("index");
-      Route::get("/tours/discounts")->name("index");
+      Route::get("/tours/{tour:id}","show")->name("index");
       
 });
