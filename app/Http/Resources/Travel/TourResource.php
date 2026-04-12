@@ -36,13 +36,18 @@ class TourResource extends JsonResource
                     'ends_at' => $this->sale_end,
                 ]),
             ],
-
+            'children' => [
+                "allows_children"     => $this->allows_children,
+                "default_child_price" => $this->default_child_price,
+                "child_age_limit"     => __('messages.child_age_limit', ['age' => $this->child_age_limit])
+            ],
             'media' => [
-              "photos"=>  collect($this->photos)->map(function ($photo) {
+                "photos" =>  collect($this->photos)->map(function ($photo) {
                     return asset("images/tours/photos/" . $photo);
                 })->toArray() ?? [],
                 'video'  => $this->video ? asset("images/tours/videos/" . $this->video) : null,
             ],
+
 
             'details' => [
                 'duration'        => $this->duration . ' ' . __('days'),

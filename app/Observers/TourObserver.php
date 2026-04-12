@@ -12,6 +12,7 @@ class TourObserver
     public function saving(Tour $tour): void
     {
         $tour->sale_price = $tour->getCalculatedSalePrice();
+        
 
     }
 

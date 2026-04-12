@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Cache;
 
 /**
@@ -73,6 +74,9 @@ class Tour extends Model
         "is_favourite",
         "photos",
         "video",
+        'default_child_price',
+        'child_age_limit',
+        'allows_children'
 
     ];
 
@@ -85,14 +89,22 @@ class Tour extends Model
         return $this->belongsTo(Trip::class, 'trip_id')->withDefault(['name' => "Not Found"]);
     }
 
+    /** @return HasMany */
+    public function tourAvailability():HasMany{
+        return $this->hasMany(TourAvailability::class,"tour_id");
+    }
     protected $casts = [
         'created_at' => 'datetime:d-m-Y H:i:s',
         'updated_at' => 'datetime:d-m-Y H:i:s',
         'is_active' => 'boolean',
         'is_favourite' => 'boolean',
         'price' => 'decimal:2',
+        'default_child_price'=>"decimal:2",
         'photos' => 'json',
+        'allows_children'=>'boolean'
     ];
+
+
     public $translatedAttributes = ['name', 'description', 'country', 'city', 'street', 'services', 'additional_data'];
 
     /**

@@ -42,6 +42,9 @@ class TourListResource extends JsonResource
               "photos"=> $this->photos ? asset("images/tours/photos/".$this?->photos[0]) : null,
             ],
 
+            'children'=>[
+                "allows_children"=>$this->allows_children,
+            ],
             'details' => [
                 'duration'        => $this->duration . ' ' . __('days'),
             ],
