@@ -21,7 +21,7 @@ trait CacheableService
     //     return Cache::tags([$tag])->remember($cacheKey, $ttl, $callback);
     // }
 
-        protected function rememberWithTags(string $tag, string $keyIdentifier, callable $callback, int $ttl = 21600): mixed
+        public function rememberWithTags(string $tag, string $keyIdentifier, callable $callback, int $ttl = 21600): mixed
         {
             $locale = app()->getLocale();
             $cacheKey = "{$tag}:{$keyIdentifier}:{$locale}";
@@ -44,7 +44,7 @@ trait CacheableService
 
             // 5. التاتش العبقري: خزن النتيجة فقط لو مش null
             // وبنستخدم الـ $store اللي هو أصلاً شايل الـ tags بتاعك
-            if ($result !== null) {
+            if ($result !== null && $result !== false && $result !== []) {
                 $store->put($cacheKey, $result, $ttl);
             }
 

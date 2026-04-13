@@ -47,9 +47,9 @@ class TourController extends BaseController
             return $this->success([], __('messages.tour_availability_retrieved'));
         }
 
-        return $this->success([
-            'availability' => new TourAvailabilityResource($result['data']),
-            'type'         => $result['type'],
-        ], __('messages.tour_availability_retrieved'));
-    }
+      return $this->success([
+        'availability' => new TourAvailabilityResource($result['data']),
+        'type'         => $result['type'],
+    ], __('messages.tour_availability_retrieved'));
+        }
 }

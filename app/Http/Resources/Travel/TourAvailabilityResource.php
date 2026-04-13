@@ -27,6 +27,9 @@ class TourAvailabilityResource extends JsonResource
                 'booked_seats'    => $this->booked,
                 'available_seats' => $this->available_seats,
             ],
+            'tour' => [
+                'id'   => $this->tour_id,
+            ],
             // التسويق
            # 'badge' => $this->badge,
             // روابط سريعة (HATEOAS Style) - اختياري

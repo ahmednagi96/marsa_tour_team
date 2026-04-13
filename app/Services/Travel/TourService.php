@@ -9,7 +9,7 @@ use App\Traits\CacheableService;
 class TourService
 {
 
-
+    /**  CacheableService instanceof  App\Traits\CacheableService*/
     use CacheableService;
 
     public function getCachedTours(array $validatedData)
