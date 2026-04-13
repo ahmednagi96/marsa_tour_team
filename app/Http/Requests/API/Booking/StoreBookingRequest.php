@@ -1,18 +1,27 @@
-<?php 
+<?php
 
 namespace App\Http\Requests\API\Booking;
 
 use App\Http\Requests\API\BaseRequest;
+use Illuminate\Validation\Rule;
 
 class StoreBookingRequest extends BaseRequest
 {
     public function rules()
-{
-    return [
-        'availability_id' => 'required|exists:tour_availabilities,id',
-        'adults_count'    => 'required|integer|min:1',
-        'children_count'  => 'required|integer|min:0',
-        'payment_gateway' => 'required|in:stripe,paymob,paypal',
-    ];
-}
+    {
+        return [
+            // بنطلب الـ ID بتاع اليوم المحدد
+            'availability_id' => 'required|exists:tour_availabilities,id',
+            
+            'adults_count'    => 'required|integer|min:1|max:50', // حطينا max للأمان
+            'children_count'  => 'required|integer|min:0|max:50',
+            
+            // اليوزر بيختار من اللي إنت متاح عندك
+            'payment_gateway' => [
+                'required',
+                Rule::in(['stripe', 'paymob', 'cash', 'paypal']),
+            ],            
+            'notes'           => 'nullable|string|max:500',
+        ];
+    }
 }

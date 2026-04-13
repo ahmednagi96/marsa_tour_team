@@ -31,8 +31,8 @@ class DatabaseSeeder extends Seeder
        # ]);
 
        TourAvailability::create([
-        'tour_id'=>Tour::factory()->create()->id,
-        'date'=>Carbon::tomorrow(),
+        'tour_id'=>1,
+        'date'=>Carbon::now()->addDays(2),
         'capacity'=>20,
         'is_active'=>1
        ]);

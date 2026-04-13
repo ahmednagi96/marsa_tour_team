@@ -8,11 +8,17 @@ use Illuminate\Support\Facades\Route;
 Route::controller(BookingController::class)->middleware("auth:sanctum")->prefix('bookings')->as('bookings.')->group(function () {
 
     // إنشاء حجز جديد (POST /api/v1/bookings)>
-    Route::post('/', 'store')->name('store');
+    Route::post('/', 'store')
+    ->middleware('throttle:bookings')
+    ->name('store');
 
     // جلب تفاصيل حجز معين (GET /api/v1/bookings/{id})
     Route::get('/{id}', 'show')->name('show');
 
     // جلب كل حجوزات المستخدم الحالي (GET /api/v1/bookings)
     Route::get('/', 'index')->name('index');
+
+    Route::get('/{booking}/pay', 'getPaymentLink')
+    ->middleware('throttle:10,1')
+    ->name('pay'); // الراوت الجديد
 });

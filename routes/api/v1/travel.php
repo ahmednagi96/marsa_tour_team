@@ -4,18 +4,20 @@ use App\Http\Controllers\API\V1\Travel\TourController;
 use App\Http\Controllers\API\V1\Travel\TripController;
 use Illuminate\Support\Facades\Route;
 
-Route::controller(TripController::class)->as("trips.")
+Route::controller(TripController::class)->prefix("/trips")->as("trips.")
    ->group(function () {
       // Trips
-      Route::get('/trips',  'index')->name('index');
-      Route::get('/trips/{trip:id}',"show");
-      Route::get('/trips/{trip:id}/tours',"tours");
-      Route::get('/trips/{trip:id}/tours/{tour:id}',"tripTour")->scopeBindings();
+      Route::get('/',  'index')->name('index');
+      Route::get('/{trip:id}',"show");
+      Route::get('/{trip:id}/tours',"tours");
+      Route::get('/{trip:id}/tours/{tour:id}',"tripTour")->scopeBindings();
 
    });
-Route::controller(TourController::class)->as('tours.')
+Route::controller(TourController::class)->prefix("/tours")->as('tours.')
    ->group(function () {
-      Route::get("/tours", "index")->name("index");
-      Route::get("/tours/{tour:id}","show")->name("index");
+      Route::get("/", "index")->name("index");
+      Route::get("/{tour:id}","show")->name("index");
+      Route::get("/{tour:id}/daily","checkDate")->name("checkDate");
+
       
 });

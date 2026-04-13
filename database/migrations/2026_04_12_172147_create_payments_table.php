@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('booking_id')->constrained()->onDelete('cascade');
             $table->decimal('amount', 10, 2); // المبلغ المدفوع
-            $table->string('currency')->default('USD');
+            $table->string('currency')->default('EGP');
             $table->string('gateway');     
             $table->string('transaction_id')->unique()->nullable();
             $table->string('status')->default('pending'); 

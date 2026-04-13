@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\API\V1\Travel;
 
 use App\Http\Controllers\API\BaseController;
+use App\Http\Requests\API\Travel\CheckDateRequest;
 use App\Http\Requests\API\Travel\TourRequest;
+use App\Http\Resources\Travel\TourAvailabilityResource;
 use App\Http\Resources\Travel\TourListResource;
 use App\Http\Resources\Travel\TourResource;
 use App\Models\Tour;
@@ -23,15 +25,31 @@ class TourController extends BaseController
         $data = TourListResource::collection($tours)->response()->getData(true);
         return $this->success($data, __('messages.tours_retrieved'));
     }
-    
-      /**
+
+    /**
      * @param  Tour $tour
      *  @return JsonResponse */
-    public function show(Tour $tour):JsonResponse
+    public function show(Tour $tour): JsonResponse
     {
         $trip = $this->tourService->getCachedTourById($tour);
         $data = new TourResource($trip);
         return $this->success($data, __('messages.tour_retrieved'));
     }
-   
+
+    public function checkDate(Tour $tour, CheckDateRequest $request)
+    {
+        $validated = $request->validated();
+
+        $result = $this->tourService
+            ->getCachedTourAvailabilitiesById($tour, $validated);
+
+        if (!$result) {
+            return $this->success([], __('messages.tour_availability_retrieved'));
+        }
+
+        return $this->success([
+            'availability' => new TourAvailabilityResource($result['data']),
+            'type'         => $result['type'],
+        ], __('messages.tour_availability_retrieved'));
+    }
 }

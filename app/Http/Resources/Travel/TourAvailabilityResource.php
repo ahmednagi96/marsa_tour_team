@@ -15,8 +15,7 @@ class TourAvailabilityResource extends JsonResource
     {
         return [
             'id'    => $this->id,
-            'date'  => $this->date, // تنسيق Y-m-d
-            
+            'date'  => $this->date, // تنسيق Y-m-d            
             'pricing' => [
                 'adult_price' => (float) $this->adult_price,
                 'child_price' => (float) $this->final_child_price,

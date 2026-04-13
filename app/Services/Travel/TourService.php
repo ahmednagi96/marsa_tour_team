@@ -3,10 +3,13 @@
 namespace App\Services\Travel;
 
 use App\Models\Tour;
+use App\Models\TourAvailability;
 use App\Traits\CacheableService;
 
 class TourService
 {
+
+
     use CacheableService;
 
     public function getCachedTours(array $validatedData)
@@ -33,5 +36,45 @@ class TourService
         return $this->rememberWithTags('trips', $cacheKey, function () use ($tour) {
             return $tour->load(['translations', 'trip']);
         });
+    }
+
+    public function getCachedTourAvailabilitiesById(Tour $tour, array $validatedData)
+    {
+
+        ksort($validatedData);
+        $filterHash = md5(json_encode($validatedData));
+        $cacheKey = "tour_show_{$tour->id}" . $filterHash;
+        return $this->rememberWithTags('tour_availabilties', $cacheKey, function () use ($tour, $validatedData) {
+            return  $this->checkTourAvailabilities($tour, $validatedData);
+        });
+    }
+
+    protected function checkTourAvailabilities(Tour $tour, array $validatedData)
+    {
+        if (!$tour || $tour->tourAvailability->isEmpty()) {
+            return null;
+        }
+
+        $availability = TourAvailability::where('tour_id', $tour->id)
+            ->where('date', $validatedData['date'])
+            ->first();
+
+        if ($availability && $availability->booked < $availability->capacity) {
+            return [
+                "type" => "exact",
+                "data" => $availability
+            ];
+        }
+
+        $suggestion = TourAvailability::where('tour_id', $tour->id)
+            ->where('date', '>', $validatedData['date'])
+            ->whereColumn('booked', '<', 'capacity')
+            ->orderBy('date')
+            ->first();
+
+        return [
+            "type" => "suggestion",
+            "data" => $suggestion
+        ];
     }
 }

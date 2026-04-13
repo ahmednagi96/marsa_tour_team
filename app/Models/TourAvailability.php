@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Cache;
 
 #[ObservedBy([TourAvailabilityObserver::class])]
 
@@ -22,7 +23,17 @@ class TourAvailability extends Model
         "child_price",
         "is_active",
     ];
-    protected $touches = ['tour']; // اسم العلاقة اللي في الموديل
+   # protected $touches = ['tour']; // اسم العلاقة اللي في الموديل
+
+    protected static function booted()
+    {
+        $clearTripsCache = function () {
+            Cache::tags(['tour_availabilties'])->flush(); 
+        };
+        static::created($clearTripsCache);
+        static::updated($clearTripsCache);
+        static::deleted($clearTripsCache);
+    }
 
 
     /** @return  BelongsTo */
@@ -44,5 +55,6 @@ class TourAvailability extends Model
         // لو مفيش سعر طفل خاص باليوم ده، هات السعر الافتراضي من موديل الجولة
         return $this->child_price ?? $this->tour->default_child_price;
     }
+
 
 }
