@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Observers\TourAvailabilityObserver;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -56,5 +57,10 @@ class TourAvailability extends Model
         return $this->child_price ?? $this->tour->default_child_price;
     }
 
-
+    public function scopeActive(Builder $query, ?bool $status = null): Builder
+    {
+        return $query->when(!is_null($status),function ($q) use ($status) {
+             return $q->where('is_active', $status);
+        });
+    }
 }

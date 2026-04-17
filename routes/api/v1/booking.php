@@ -8,7 +8,8 @@ use Illuminate\Support\Facades\Route;
 Route::controller(BookingController::class)->middleware("auth:sanctum")->prefix('bookings')->as('bookings.')->group(function () {
 
     // إنشاء حجز جديد (POST /api/v1/bookings)>
-    Route::post('/', 'store')
+    Route::post('/', 'checkout')
+    ->withoutMiddleware('throttle:api')
     ->middleware('throttle:bookings')
     ->name('store');
 

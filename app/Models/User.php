@@ -65,10 +65,10 @@ class User extends Authenticatable
         'photo',
         'fcm_token'
     ];
-    public function getRouteKeyName(): string
-    {
-        return 'phone';
-    }
+   // public function getRouteKeyName(): string
+   // {
+     //   return 'phone';
+    //}
        protected $hidden = [
         'password',
         'remember_token',

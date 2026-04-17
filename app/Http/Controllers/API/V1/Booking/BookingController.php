@@ -2,24 +2,27 @@
 
 namespace App\Http\Controllers\API\V1\Booking;
 
+use App\Actions\BookingTour;
+use App\DTOs\TourBookingRequestDto;
+use App\DTOs\UserDto;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\API\Booking\StoreBookingRequest;
+use App\Http\Requests\API\Booking\CheckoutRequest;
 use App\Models\Booking;
-use App\Services\BookingService;
+use App\Services\Booking\BookingService;
 use App\Services\PaymentService; // الخدمة اللي بتكلم بوابة الدفع
 use Illuminate\Http\JsonResponse;
 use Exception;
 
 class BookingController extends Controller
 {
-    protected $bookingService;
     protected $paymentService;
 
-    public function __construct(BookingService $bookingService, 
+    public function __construct(public BookingService $bookingService,
+    public BookingTour $bookingTour 
    // PaymentService $paymentService
     )
     {
-        $this->bookingService = $bookingService;
+       // $this->bookingService = $bookingService;
         //$this->paymentService = $paymentService;
     }
 
@@ -28,8 +31,30 @@ class BookingController extends Controller
      */
   // داخل BookingController.php
 
-public function store(StoreBookingRequest $request): JsonResponse
+public function checkout(CheckoutRequest $request): JsonResponse
 {
+
+    $data=$request->validated();
+
+
+    /** @var UserDto $user
+     * @param \App\Models\User $request->user()
+     */
+    $userDto=UserDto::fromEloquentModel($request->user());
+
+
+    /** 
+     * @var $TourBookingRequestDto $tourBooking
+     *  @param CheckoutRequest $data
+     */
+    $tourBookingDto=TourBookingRequestDto::fromEloquentModel($data['tour_id'],$data['adults_count'],$data['children_count']);
+
+
+    $bookingDto=$this->bookingTour->handle(
+        tourBookingRequestDto: $tourBookingDto,
+        userDto: $userDto);
+
+
     try {
         $booking = $this->bookingService->createBooking($request->validated(), $request->user());
 
