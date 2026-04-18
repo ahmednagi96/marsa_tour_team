@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Observers\TourAvailabilityObserver;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -26,6 +27,7 @@ class TourAvailability extends Model
     ];
    # protected $touches = ['tour']; // اسم العلاقة اللي في الموديل
 
+   #protected $appends = ['available_seats'];
     protected static function booted()
     {
         $clearTripsCache = function () {
@@ -34,6 +36,11 @@ class TourAvailability extends Model
         static::created($clearTripsCache);
         static::updated($clearTripsCache);
         static::deleted($clearTripsCache);
+    }
+
+    public function availableSeats(): Attribute
+    {
+        return Attribute::get(fn()=> $this->capacity - $this->booked);
     }
 
 

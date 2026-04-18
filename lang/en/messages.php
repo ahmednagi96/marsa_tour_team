@@ -14,5 +14,7 @@ return [
         "nottrending" => "Not Trending",
         'child_age_limit' => 'Child age limit is :age years old',
         'too_many_requests' => 'Too many attempts. Please try again in a minute.',
-        "tour_availability_retrieved"=>"Daily Tours retrieved successfully"
+        "tour_availability_retrieved"=>"Daily Tours retrieved successfully",
+        'no_seats_available' => 'Sorry, there are not enough seats available at the moment.',
+        'tour_not_available' => 'Sorry, this tour is not available for booking at the moment.',
 ];

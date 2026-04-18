@@ -56,6 +56,7 @@ class TourService
         }
 
         $availability = TourAvailability::where('tour_id', $tour->id)
+            ->active(true)
             ->where('date', $validatedData['date'])
             ->first();
 
@@ -70,6 +71,7 @@ class TourService
             ->where('date', '>', $validatedData['date'])
             ->whereColumn('booked', '<', 'capacity')
             ->orderBy('date')
+            ->active(true)
             ->first();
 
         return [

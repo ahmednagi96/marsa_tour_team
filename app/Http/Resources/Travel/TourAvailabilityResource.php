@@ -33,7 +33,7 @@ class TourAvailabilityResource extends JsonResource
             // التسويق
            # 'badge' => $this->badge,
             // روابط سريعة (HATEOAS Style) - اختياري
-            'can_book' => $this->is_active && $this->available_seats > 0,
+            'can_book' => (bool) $this->is_active && $this->available_seats > 0,
         ];
     }
 }
