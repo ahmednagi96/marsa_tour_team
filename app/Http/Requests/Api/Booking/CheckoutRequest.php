@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Http\Requests\API\Booking;
+namespace App\Http\Requests\Api\Booking;
 
-use App\Http\Requests\API\BaseRequest;
+use App\Http\Requests\Api\BaseRequest;
 use Illuminate\Validation\Rule;
 
 class CheckoutRequest extends BaseRequest

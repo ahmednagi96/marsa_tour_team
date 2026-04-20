@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Http\Controllers\API\V1\Travel;
+namespace App\Http\Controllers\Api\V1\Travel;
 
-use App\Http\Controllers\API\BaseController;
+use App\Http\Controllers\Api\BaseController;
 use App\Http\Requests\API\Travel\TourRequest;
 use App\Http\Requests\API\Travel\TripRequest;
 use App\Http\Resources\Travel\TourListResource;

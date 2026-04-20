@@ -2,6 +2,7 @@
 
 namespace App\Traits;
 
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Exceptions\ThrottleRequestsException;
@@ -22,6 +23,7 @@ trait HandleException
             $e instanceof ThrottleRequestsException => 429,
             $e instanceof ModelNotFoundException => 404,
             $e instanceof AuthenticationException => 401,
+            $e instanceof AuthorizationException => 403,
             default => 500
         };
 
@@ -38,6 +40,7 @@ trait HandleException
                 : __('exceptions.not_found'),
                 
             401 => __('exceptions.unauthenticated'),
+            403 => __('exceptions.unauthorized'),
             
             429 => $e instanceof ThrottleRequestsException
                 ? $this->getThrottleMessage($e)

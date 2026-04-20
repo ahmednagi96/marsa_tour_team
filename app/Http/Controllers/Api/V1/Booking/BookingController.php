@@ -1,19 +1,19 @@
 <?php
 
-namespace App\Http\Controllers\API\V1\Booking;
+namespace App\Http\Controllers\Api\V1\Booking;
 
 use App\Actions\BookingTour;
 use App\DTOs\TourBookingRequestDto;
 use App\DTOs\UserDto;
-use App\Http\Controllers\Controller;
-use App\Http\Requests\API\Booking\CheckoutRequest;
+use App\Http\Controllers\Api\BaseController;
+use App\Http\Requests\Api\Booking\CheckoutRequest;
 use App\Models\Booking;
 use App\Services\Booking\BookingService;
 use App\Services\PaymentService; // الخدمة اللي بتكلم بوابة الدفع
 use Illuminate\Http\JsonResponse;
 use Exception;
 
-class BookingController extends Controller
+class BookingController extends BaseController
 {
     protected $paymentService;
 
@@ -55,31 +55,6 @@ public function checkout(CheckoutRequest $request): JsonResponse
         userDto: $userDto);
 
 
-    try {
-        $booking = $this->bookingService->createBooking($request->validated(), $request->user());
-
-        $responseData = [
-            'booking_id'  => $booking->id,
-            'total_price' => $booking->total_price,
-            'status'      => $booking->status,
-        ];
-
-        // لو الدفع أونلاين، نولد الرابط ونضيفه للرد
-        if ($booking->payment_method !== 'cash') {
-            $payment = $booking->payments->first();
-            $responseData['payment_url'] = $this->paymentService->generateLink($payment);
-            $responseData['expires_at']  = $booking->created_at->addMinutes(15)->toDateTimeString();
-        }
-
-        return response()->json([
-            'status'  => 'success',
-            'message' => $booking->payment_method === 'cash' ? 'تم الحجز بنجاح (دفع نقدي).' : 'برجاء إتمام الدفع.',
-            'data'    => $responseData
-        ], 201);
-
-    } catch (Exception $e) {
-        return response()->json(['status' => 'error', 'message' => $e->getMessage()], 422);
-    }
 }
 
 /**

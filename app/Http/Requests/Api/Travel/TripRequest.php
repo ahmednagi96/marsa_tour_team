@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Http\Requests\API\Travel;
+namespace App\Http\Requests\Api\Travel;
 
-use App\Http\Requests\API\BaseRequest;
+use App\Http\Requests\Api\BaseRequest;
 
 class TripRequest extends BaseRequest
 {

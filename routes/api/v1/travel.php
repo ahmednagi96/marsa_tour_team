@@ -1,7 +1,7 @@
 <?php
 
-use App\Http\Controllers\API\V1\Travel\TourController;
-use App\Http\Controllers\API\V1\Travel\TripController;
+use App\Http\Controllers\Api\V1\Travel\TourController;
+use App\Http\Controllers\Api\V1\Travel\TripController;
 use App\Models\Tour;
 use Illuminate\Support\Facades\Route;
 

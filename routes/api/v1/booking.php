@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\API\V1\Booking\BookingController;
+use App\Http\Controllers\Api\V1\Booking\BookingController;
 use Illuminate\Support\Facades\Route;
 
 // لاحظ إضافة النقطة في الـ "as" لتنظيم الأسماء
@@ -9,8 +9,7 @@ Route::controller(BookingController::class)->middleware("auth:sanctum")->prefix(
 
     // إنشاء حجز جديد (POST /api/v1/bookings)>
     Route::post('/', 'checkout')
-    ->withoutMiddleware('throttle:api')
-    ->middleware('throttle:bookings')
+    ->middleware(['throttle:api'])
     ->name('store');
 
     // جلب تفاصيل حجز معين (GET /api/v1/bookings/{id})

@@ -35,6 +35,12 @@ class RouteServiceProvider extends ServiceProvider
                 ->name('v1.')
                 ->group(base_path('routes/api/v1/booking.php'));
 
+                
+                Route::middleware(['api', 'localizationRedirect', 'localeViewPath'])
+                ->prefix(LaravelLocalization::setLocale() . '/api/v1')
+                ->name('v1.')
+                ->group(base_path('routes/api/v1/payment.php'));
+
             Route::middleware('web')
                 ->group(base_path('routes/web.php'));
         });
@@ -43,15 +49,10 @@ class RouteServiceProvider extends ServiceProvider
     {
         RateLimiter::for('api', function (Request $request) {
             if ($request->is('*api/v1/booking*')) {
-                 return Limit::perMinute(5)->by($request->user()?->id ?: $request->ip())
-                    ->response(function (Request $request, array $headers) {
-                        return response()->json([
-                            'status' => false,
-                            'message' => __('messages.too_many_requests'),
-                        ], 429, $headers);
-                    });
+                 return Limit::perMinute(5)->by($request->user()?->id ?: $request->ip());
+            }else{
+                return Limit::perMinute(60)->by($request->user()?->id ?: $request->ip());
             }
-            return Limit::perMinute(60)->by($request->user()?->id ?: $request->ip());
         });
     }
 }
