@@ -7,12 +7,11 @@ use Illuminate\Support\Facades\Route;
 
 Route::controller(BookingController::class)->middleware("auth:sanctum")->prefix('bookings')->as('bookings.')->group(function () {
 
-    // إنشاء حجز جديد (POST /api/v1/bookings)>
-    Route::post('/', 'checkout')
+    Route::post('/checkout', 'checkout')
     ->middleware(['throttle:api'])
     ->name('store');
 
-    // جلب تفاصيل حجز معين (GET /api/v1/bookings/{id})
+    
     Route::get('/{id}', 'show')->name('show');
 
     // جلب كل حجوزات المستخدم الحالي (GET /api/v1/bookings)

@@ -8,4 +8,7 @@ return [
         'cancelled' => 'Payment Cancelled',
         'pending'   => 'Pending Payment',
     ],
+    "callback_success"=>"payment paid successfully",
+    "callback_failed"=>"sorry , payment failed !",
+    "invalid_payload"=>"Invalid Payload"
 ];

@@ -197,6 +197,7 @@ return [
         App\Providers\HorizonServiceProvider::class,
         App\Providers\Filament\YPanelProvider::class,
         App\Providers\RouteServiceProvider::class,
+        Barryvdh\DomPDF\ServiceProvider::class,
 
     ],
 
@@ -212,6 +213,7 @@ return [
     */
 
     'aliases' => Facade::defaultAliases()->merge([
+        'Pdf' => Barryvdh\DomPDF\Facade\Pdf::class,
         // 'ExampleClass' => App\Example\ExampleClass::class,
     ])->toArray(),
 

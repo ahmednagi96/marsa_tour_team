@@ -3,10 +3,9 @@
 namespace App\Http\Controllers\Api\V1\Travel;
 
 use App\Http\Controllers\Api\BaseController;
-use App\Http\Requests\API\Travel\CheckDateRequest;
-use App\Http\Requests\API\Travel\TourRequest;
+use App\Http\Requests\Api\Travel\CheckDateRequest;
+use App\Http\Requests\Api\Travel\TourRequest;
 use App\Http\Resources\Travel\TourAvailabilityResource;
-use App\Http\Resources\Travel\TourListResource;
 use App\Http\Resources\Travel\TourResource;
 use App\Models\Tour;
 use App\Services\Travel\TourService;
@@ -22,7 +21,7 @@ class TourController extends BaseController
     {
         $filters = $request->validated();
         $tours = $this->tourService->getCachedTours($filters);
-        $data = TourListResource::collection($tours)->response()->getData(true);
+        $data = TourResource::collection($tours)->response()->getData(true);
         return $this->success($data, __('messages.tours_retrieved'));
     }
 
@@ -38,18 +37,16 @@ class TourController extends BaseController
 
     public function checkDate(Tour $tour, CheckDateRequest $request)
     {
-        $validated = $request->validated();
 
+        $validated = $request->validated();
         $result = $this->tourService
             ->getCachedTourAvailabilitiesById($tour, $validated);
-
-        if (!$result) {
+            if (!$result) {
             return $this->success([], __('messages.tour_availability_retrieved'));
         }
-
-      return $this->success([
-        'availability' => new TourAvailabilityResource($result['data']),
-        'type'         => $result['type'],
-    ], __('messages.tour_availability_retrieved'));
-        }
+        return $this->success([
+            'availability' => new TourAvailabilityResource($result['data']),
+            'type'         => $result['type'],
+        ], __('messages.tour_availability_retrieved'));
+    }
 }

@@ -17,4 +17,6 @@ return [
     "tour_availability_retrieved"=>"تم استرجاع الرحلات اليوميه بنجاح",
     'no_seats_available' => 'عفواً، لا يوجد أماكن كافية المتاحة حالياً.',
     'tour_not_available' => 'عفواً، هذه الجولة غير متاحة للحجز حالياً.',
+    "checkout_success"=>"تم الدفع المستخدم بنجاح",
+    "callback_failed"=>"للأسف فشلت عمليه الدفع",
 ];

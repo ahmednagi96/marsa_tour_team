@@ -1,26 +1,16 @@
 <?php
 
-use App\Traits\CacheableService;
+use App\Events\BookingProcessed;
+use App\Listeners\HandleBookingNotification;
+use App\Mail\BookingStatusMail;
+use App\Models\Booking;
+use Illuminate\Contracts\Events\Dispatcher;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Route;
 
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider and all of them will
-| be assigned to the "web" middleware group. Make something great!
-|
-*/
-
-
-
-class TestTag{
-    use CacheableService;
-
-    public function index(){
-        return $this->rememberWithTags("test_tags","test",fn()=>[1,2,3]);
-    }
-}
-Route::get("/test-tag",[TestTag::class,"index"]);
+Route::get("test-url",function(Dispatcher $events){
+   // return route("v1.payment.webhook");
+   $booking=Booking::latest()->first();
+   #Mail::to("ahmednagi_96@icloud.com")->send(new BookingStatusMail($booking,"success","https://test.com"));
+   $events->dispatch(new BookingProcessed($booking,'success'));
+});

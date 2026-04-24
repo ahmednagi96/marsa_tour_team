@@ -5,6 +5,7 @@ namespace App\Services\Travel;
 use App\Models\Tour;
 use App\Models\TourAvailability;
 use App\Traits\CacheableService;
+use Carbon\Carbon;
 
 class TourService
 {
@@ -40,43 +41,49 @@ class TourService
 
     public function getCachedTourAvailabilitiesById(Tour $tour, array $validatedData)
     {
-
         ksort($validatedData);
         $filterHash = md5(json_encode($validatedData));
-        $cacheKey = "tour_show_{$tour->id}" . $filterHash;
+        $cacheKey = "tour_show_{$tour->id}_{$filterHash}";    
         return $this->rememberWithTags('tour_availabilties', $cacheKey, function () use ($tour, $validatedData) {
-            return  $this->checkTourAvailabilities($tour, $validatedData);
+            return $this->checkTourAvailabilities($tour, $validatedData);
         });
     }
-
+    
     protected function checkTourAvailabilities(Tour $tour, array $validatedData)
     {
-        if (!$tour || $tour->tourAvailability->isEmpty()) {
-            return null;
-        }
-
-        $availability = TourAvailability::where('tour_id', $tour->id)
-            ->active(true)
-            ->where('date', $validatedData['date'])
+        if (!$tour) return null;
+    
+        $date = Carbon::createFromFormat('d-m-Y', $validatedData['date'])->format('Y-m-d');
+    
+        // 1. Exact Match
+        $availability = $tour->tourAvailability()
+            ->active()
+            ->whereDate('date', $date)
+            ->whereColumn('booked', '<', 'capacity')
             ->first();
-
-        if ($availability && $availability->booked < $availability->capacity) {
+    
+        if ($availability) {
             return [
                 "type" => "exact",
                 "data" => $availability
             ];
         }
-
-        $suggestion = TourAvailability::where('tour_id', $tour->id)
-            ->where('date', '>', $validatedData['date'])
+    
+        // 2. Suggestion
+        $suggestion = $tour->tourAvailability()
+            ->active(true) // تأكد أن السكوب لا يحتاج true إلا لو كنت معرفه كدا
+            ->whereDate('date', '>', $date)
             ->whereColumn('booked', '<', 'capacity')
-            ->orderBy('date')
-            ->active(true)
+            ->orderBy('date', 'asc')
             ->first();
-
-        return [
-            "type" => "suggestion",
-            "data" => $suggestion
-        ];
+    
+        if ($suggestion) {
+            return [
+                "type" => "suggestion",
+                "data" => $suggestion
+            ];
+        }
+    
+        return null;
     }
 }

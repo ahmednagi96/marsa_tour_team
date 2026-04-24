@@ -9,79 +9,76 @@ use App\Http\Controllers\Api\BaseController;
 use App\Http\Requests\Api\Booking\CheckoutRequest;
 use App\Models\Booking;
 use App\Services\Booking\BookingService;
-use App\Services\PaymentService; // الخدمة اللي بتكلم بوابة الدفع
 use Illuminate\Http\JsonResponse;
-use Exception;
 
 class BookingController extends BaseController
 {
     protected $paymentService;
 
-    public function __construct(public BookingService $bookingService,
-    public BookingTour $bookingTour 
-   // PaymentService $paymentService
-    )
-    {
-       // $this->bookingService = $bookingService;
+    public function __construct(
+        public BookingService $bookingService,
+        public BookingTour $bookingTour
+        // PaymentService $paymentService
+    ) {
+        // $this->bookingService = $bookingService;
         //$this->paymentService = $paymentService;
     }
 
     /**
      * إنشاء حجز جديد
      */
-  // داخل BookingController.php
+    // داخل BookingController.php
 
-public function checkout(CheckoutRequest $request): JsonResponse
-{
+    public function checkout(CheckoutRequest $request)
+    {
 
-    $data=$request->validated();
+        $data = $request->validated();
 
 
-    /** @var UserDto $user
-     * @param \App\Models\User $request->user()
+        /** @var UserDto $user
+         * @param \App\Models\User $request->user()
+         */
+        $userDto = UserDto::fromEloquentModel($request->user());
+        /** 
+         * @var $TourBookingRequestDto $tourBooking
+         *  @param CheckoutRequest $data
+         */
+        $tourBookingDto = TourBookingRequestDto::fromEloquentModel($data['availability_id'], $data['adults_count'], $data['children_count']);
+
+
+        $paymentResource = $this->bookingTour->handle(
+            tourBookingRequestDto: $tourBookingDto,
+            userDto: $userDto
+       );
+
+         return $this->success($paymentResource, __("messages.checkout_success"), 200);
+    }
+
+    /**
+     * رابط الدفع لحجز موجود مسبقاً (إعادة المحاولة)
+     * GET /api/v1/bookings/{id}/pay
      */
-    $userDto=UserDto::fromEloquentModel($request->user());
+    public function getPaymentLink(Booking $booking): JsonResponse
+    {
+        // التأكد إن الحجز لسه pending ومن حق المستخدم الحالي
+        if ($booking->user_id !== auth()->id() || $booking->status !== 'pending') {
+            return response()->json(['message' => 'هذا الحجز غير متاح للدفع حالياً.'], 403);
+        }
 
+        // التأكد إن الـ 15 دقيقة مخلصوش
+        if ($booking->created_at->addMinutes(15)->isPast()) {
+            return response()->json(['message' => 'عفواً، انتهت صلاحية الحجز.'], 422);
+        }
 
-    /** 
-     * @var $TourBookingRequestDto $tourBooking
-     *  @param CheckoutRequest $data
-     */
-    $tourBookingDto=TourBookingRequestDto::fromEloquentModel($data['tour_id'],$data['adults_count'],$data['children_count']);
+        $payment = $booking->payments()->where('status', 'pending')->first();
 
+        if (!$payment) {
+            return response()->json(['message' => 'لا توجد عملية دفع معلقة لهذا الحجز.'], 404);
+        }
 
-    $bookingDto=$this->bookingTour->handle(
-        tourBookingRequestDto: $tourBookingDto,
-        userDto: $userDto);
-
-
-}
-
-/**
- * رابط الدفع لحجز موجود مسبقاً (إعادة المحاولة)
- * GET /api/v1/bookings/{id}/pay
- */
-public function getPaymentLink(Booking $booking): JsonResponse
-{
-    // التأكد إن الحجز لسه pending ومن حق المستخدم الحالي
-    if ($booking->user_id !== auth()->id() || $booking->status !== 'pending') {
-        return response()->json(['message' => 'هذا الحجز غير متاح للدفع حالياً.'], 403);
+        return response()->json([
+            'payment_url' => $this->paymentService->generateLink($payment),
+            'expires_at'  => $booking->created_at->addMinutes(15)->toDateTimeString()
+        ]);
     }
-
-    // التأكد إن الـ 15 دقيقة مخلصوش
-    if ($booking->created_at->addMinutes(15)->isPast()) {
-        return response()->json(['message' => 'عفواً، انتهت صلاحية الحجز.'], 422);
-    }
-
-    $payment = $booking->payments()->where('status', 'pending')->first();
-    
-    if (!$payment) {
-        return response()->json(['message' => 'لا توجد عملية دفع معلقة لهذا الحجز.'], 404);
-    }
-
-    return response()->json([
-        'payment_url' => $this->paymentService->generateLink($payment),
-        'expires_at'  => $booking->created_at->addMinutes(15)->toDateTimeString()
-    ]);
-}
 }

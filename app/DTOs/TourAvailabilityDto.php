@@ -24,6 +24,6 @@ readonly class TourAvailabilityDto{
      *  @return TourAvailabilityDto
      */
     public static function fromEloquentModel(TourAvailability $model): TourAvailabilityDto{
-        return new self($model->id,$model->tour_id,$model->date,$model->capacity,$model->booked, $model->adult_price,$model->child_price,$model->isActive,$model->available_seats);
+        return new self($model->id,$model->tour_id,$model->date,$model->capacity,$model->booked, $model->adult_price,$model->child_price,$model->is_active,$model->available_seats);
     }
 }

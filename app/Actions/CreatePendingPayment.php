@@ -18,6 +18,6 @@ class CreatePendingPayment
             'status'         =>PaymentStatus::PENDING,
             'payload'        => $response, 
         ]);
-    return new PaymentResource($payemnt);
+    return new PaymentResource($payemnt->load('booking'));
     }
 }

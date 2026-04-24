@@ -2,25 +2,32 @@
 
 namespace App\Infrastructure\Payment;
 
+use App\Enums\PaymentStatus;
 use App\Exceptions\PaymentFailedException;
 use App\Models\Booking;
-use App\Models\User;
+use App\Models\Payment;
+use App\Traits\ApiResponse;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 
 final class TapSDK
 {
+    use ApiResponse;
     protected $apiClient;
     protected $url;
+    protected $chrageUrl;
     public function __construct()
     {
         $this->apiClient = Http::withHeaders([
-            "Authorization" => "Bearer " . env("TAP_HEADER"),
+            "Authorization" => "Bearer " . config("payment.TAP_HEADER"),
             'accept' => 'application/json',
             'content-type' => 'application/json',
             'lang_code' => app()->getLocale()
         ]);
-        $this->url = env('TAP_URL');
+        $this->url = config('payment.TAP_URL');
+        $this->chrageUrl=$this->url."charges";
     }
 
     protected function initailPostRequest($url, $data)
@@ -34,7 +41,7 @@ final class TapSDK
 
     public function charge(Booking $booking):array
     {
-        $response = $this->initailPostRequest($this->url, $this->prepareChargeData($booking));
+        $response = $this->initailPostRequest($this->chrageUrl, $this->prepareChargeData($booking));
         if ($response->failed()) {
             throw new PaymentFailedException(
                 __('exceptions.payment_initiation_failed')
@@ -71,30 +78,48 @@ final class TapSDK
                 ]
             ],
             "source" => ["id" => "src_all"],
-            "post" => ["url" => route('v1.payment.webhook')],
+            "post" => ["url" =>route('v1.payemnt.webhook')],
             "redirect" => ["url" => route("v1.payment.callback")]
         ];
     }
 
-    public function callback()
+    public function callback():JsonResponse
     {
         $tapId=request()->get("tap_id");
-        $response = $this->initailGetRequest("https://api.tap.company/v2/charges/{$tapId}");
-        $paymentStatus = $response->json()['status'];
+        $response = $this->initailGetRequest($this->chrageUrl."/{$tapId}");
 
-        if ($paymentStatus == 'CAPTURED') {
-            return response()->json(['payment.success', ['message' => 'تم الحجز بنجاح يا بطل!']]);
-        } else {
-            return response()->json(['payment.failed', ['error' => 'للأسف العملية فشلت بسبب: ']]);
+        if ($response->json()['status'] !== "CAPTURED") {
+            throw new PaymentFailedException(
+                __('payments.callback_failed')
+            );
         }
+        return $this->success([],__('payments.callback_success'),200);
+
     }
-    public function webhook(Request $request) {
-        if(request()->get("status") == "CAPTURED"){
-            User::first()->update(['name'=>"success"]);      
-        }else{
-            User::first()->update(['name'=>"test"]);
-        }
-           
-        return response()->json([], 200);
+    public function webhook(Request $request): void
+    {
+        $payload = $request->all();
+        $tapId = $payload['id'] ?? null;
+        $status = $payload['status'] ?? null;
+    
+        if (!$tapId) return;
+    
+        // استخدام DB Transaction لضمان إن مفيش حاجة تضرب في النص
+        DB::transaction(function () use ($tapId, $status) {
+            // lockForUpdate بيمنع أي عملية تانية تعدل على الـ Payment في نفس اللحظة
+            $payment = Payment::where("transaction_id", $tapId)->lockForUpdate()->first();
+    
+            if (!$payment) return;
+    
+            // لو الدفع متسجل فعلاً إنه CAPTURED قبل كدة، ما تعملش حاجة (Idempotency)
+            if ($payment->status === PaymentStatus::CAPTURED) return;
+    
+            if ($status === "CAPTURED") {
+                $payment->completeBooking(); 
+            } else if (in_array($status, ['FAILED', 'CANCELLED'])) {
+                $payment->failedBooking();
+            }
+        });
     }
+
 }

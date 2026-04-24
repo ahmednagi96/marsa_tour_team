@@ -8,6 +8,8 @@ use App\Enums\BookingStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Booking extends Model
 {
@@ -82,5 +84,10 @@ class Booking extends Model
         $this->child_price = $dto->childrenCount * $dto->tourAvailability->childPrice;
         $this->adult_price = $dto->adultsCount * $dto->tourAvailability->adultPrice;
         $this->total_price = $this->child_price + $this->adult_price;
+    }
+
+    public function payments():HasMany
+    {
+        return $this->hasMany(Payment::class,"booking_id");
     }
 }

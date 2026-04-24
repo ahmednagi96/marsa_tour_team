@@ -2,11 +2,13 @@
 
 namespace App\Providers;
 
+use App\Infrastructure\Payment\PaymentCallbackInterface;
 use App\Infrastructure\Payment\PaymentInterface;
 use App\Models\TourAvailability;
 use App\Models\User;
 use App\Services\Interfaces\SendSmsInterface;
 use App\Services\OTPService;
+use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 
@@ -21,6 +23,7 @@ class AppServiceProvider extends ServiceProvider
 
         $provider=config("payment.payment_providers.".config("payment.provider"));
         $this->app->bind(PaymentInterface::class,$provider);
+        $this->app->bind(PaymentCallbackInterface::class,$provider);
 
     }
 
@@ -29,6 +32,5 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
     }
 }

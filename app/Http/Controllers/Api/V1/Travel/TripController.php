@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\Api\V1\Travel;
 
 use App\Http\Controllers\Api\BaseController;
-use App\Http\Requests\API\Travel\TourRequest;
-use App\Http\Requests\API\Travel\TripRequest;
-use App\Http\Resources\Travel\TourListResource;
+use App\Http\Requests\Api\Travel\TourRequest;
+use App\Http\Requests\Api\Travel\TripRequest;
+use App\Http\Resources\Travel\TourResource;
 use App\Http\Resources\Travel\TripResource;
 use App\Models\Tour;
 use App\Models\Trip;
@@ -45,7 +45,7 @@ class TripController extends BaseController
     {
         $filters = $request->validated();
         $tripTours = $this->tripService->getCachedTripToursById($trip->id, $filters);
-        $data = TourListResource::collection($tripTours)->response()->getData(true);
+        $data = TourResource::collection($tripTours)->response()->getData(true);
         return $this->success($data, __('messages.trip_tours_retrieved'));
     }
 

@@ -10,7 +10,7 @@ Route::controller(TripController::class)->prefix("/trips")->as("trips.")
    ->group(function () {
       // Trips
       Route::get('/',  'index')->name('index');
-      Route::get('/{trip:id}',"show");
+      Route::get('/{trip:id}',"show")->name("show");
       Route::get('/{trip:id}/tours',"tours");
       Route::get('/{trip:id}/tours/{tour:id}',"tripTour")->scopeBindings();
 
@@ -18,7 +18,7 @@ Route::controller(TripController::class)->prefix("/trips")->as("trips.")
 Route::controller(TourController::class)->prefix("/tours")->as('tours.')
    ->group(function () {
       Route::get("/", "index")->name("index");
-      Route::get("/{tour:id}","show")->name("index");
+      Route::get("/{tour:id}","show")->name("show");
       Route::get("/{tour:id}/daily","checkDate")->name("checkDate");      
 });
 

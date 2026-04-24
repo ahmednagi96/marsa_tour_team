@@ -25,6 +25,7 @@ class TourAvailability extends Model
         "child_price",
         "is_active",
     ];
+    protected $casts = ['date'=>'date:d-m-Y'];
    # protected $touches = ['tour']; // اسم العلاقة اللي في الموديل
 
    #protected $appends = ['available_seats'];

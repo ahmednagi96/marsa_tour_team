@@ -7,4 +7,6 @@ return [
         'cancelled' => 'تم إلغاء العملية',
         'pending'   => 'قيد الانتظار',
     ],
+    "callback_success"=>"تم الدفع بنجاح",
+    "invalid_payload"=>"لا يوجد رقم للدفع"
 ];

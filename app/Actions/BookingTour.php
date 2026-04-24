@@ -20,40 +20,65 @@ class BookingTour
         protected ChargePaymentAction $chargePayment,
         protected CreatePendingPayment $createPendingPayment,
         protected DatabaseManager $databaseManager
-        )
-    {
+    ) {
         //
     }
-  #  public function handle(
-   #     TourBookingRequestDto $tourBookingRequestDto,
+    #  public function handle(
+    #     TourBookingRequestDto $tourBookingRequestDto,
     #    UserDto $userDto,
     #):PaymentResource {
-     #   $lockKey = "booking_lock_availability_{$tourBookingRequestDto->tourAvailability->id}";
-     #   return Cache::lock($lockKey, 10)->block(5, function () use ($tourBookingRequestDto, $userDto) {
-      #        $this->bookingService->validateAvailability($tourBookingRequestDto);
-       #       $booking = Booking::createFromDto($tourBookingRequestDto, $userDto->id);
-        #      $this->tourAvailabiltyManager->reserveSeats($tourBookingRequestDto->tourAvailability->id,$tourBookingRequestDto->adultsCount);
-         #     $reponseCharge=$this->chargePayment->handle($booking->load('tour','user'));
-          #    $result=$this->createPendingPayment->handle( response:$reponseCharge,bookingId: $booking->id,provider:config('payment.provider'));
-           #    return $result;
-       # });
+    #   $lockKey = "booking_lock_availability_{$tourBookingRequestDto->tourAvailability->id}";
+    #   return Cache::lock($lockKey, 10)->block(5, function () use ($tourBookingRequestDto, $userDto) {
+    #        $this->bookingService->validateAvailability($tourBookingRequestDto);
+    #       $booking = Booking::createFromDto($tourBookingRequestDto, $userDto->id);
+    #      $this->tourAvailabiltyManager->reserveSeats($tourBookingRequestDto->tourAvailability->id,$tourBookingRequestDto->adultsCount);
+    #     $reponseCharge=$this->chargePayment->handle($booking->load('tour','user'));
+    #    $result=$this->createPendingPayment->handle( response:$reponseCharge,bookingId: $booking->id,provider:config('payment.provider'));
+    #    return $result;
+    # });
 
     #}
-       public function handle(
-       TourBookingRequestDto $tourBookingRequestDto,
+    #  public function handle(
+    #  TourBookingRequestDto $tourBookingRequestDto,
+    #   UserDto $userDto,
+    # ):PaymentResource {
+    #    $lockKey = "booking_lock_availability_{$tourBookingRequestDto->tourAvailability->id}";
+    #       return Cache::lock($lockKey, 10)->block(5, function () use ($tourBookingRequestDto, $userDto) {
+    #         return $this->databaseManager->transaction(function () use ($tourBookingRequestDto,$userDto){
+    #         $booking = Booking::createFromDto($tourBookingRequestDto, $userDto->id);
+    #        $this->tourAvailabiltyManager->reserveSeats($tourBookingRequestDto->tourAvailability->id,$tourBookingRequestDto->adultsCount);
+    #        return $booking;
+    #       });            
+    #    })->then(function ($booking) {
+    #            $reponseCharge = $this->chargePayment->handle($booking->load('tour', 'user'));
+    #            $result=$this->createPendingPayment->handle( response:$reponseCharge,bookingId: $booking->id,provider:config('payment.provider'));
+    #            return $result;
+    #    });  
+    # }
+    public function handle(
+        TourBookingRequestDto $tourBookingRequestDto,
         UserDto $userDto,
-    ):PaymentResource {
+    ): PaymentResource {
         $lockKey = "booking_lock_availability_{$tourBookingRequestDto->tourAvailability->id}";
-            return Cache::lock($lockKey, 10)->block(5, function () use ($tourBookingRequestDto, $userDto) {
-               return $this->databaseManager->transaction(function () use ($tourBookingRequestDto,$userDto){
+        $booking = Cache::lock($lockKey, 10)->block(5, function () use ($tourBookingRequestDto, $userDto) {
+            return $this->databaseManager->transaction(function () use ($tourBookingRequestDto, $userDto) {
                 $booking = Booking::createFromDto($tourBookingRequestDto, $userDto->id);
-                $this->tourAvailabiltyManager->reserveSeats($tourBookingRequestDto->tourAvailability->id,$tourBookingRequestDto->adultsCount);
+                $this->tourAvailabiltyManager->reserveSeats(
+                    $tourBookingRequestDto->tourAvailability->id,
+                    $tourBookingRequestDto->adultsCount
+                );
                 return $booking;
-               });            
-            })->then(function ($booking) {
-                    $reponseCharge = $this->chargePayment->handle($booking->load('tour', 'user'));
-                    $result=$this->createPendingPayment->handle( response:$reponseCharge,bookingId: $booking->id,provider:config('payment.provider'));
-                    return $result;
-            });  
+            });
+        });
+
+        if (!$booking) {
+            throw new \Exception("Unable to process booking at the moment.");
+        }
+        $reponseCharge = $this->chargePayment->handle($booking->load('tour', 'user'));
+        return   $this->createPendingPayment->handle(
+            response: $reponseCharge,
+            bookingId: $booking->id,
+            provider: config('payment.provider')
+        );
     }
 }
