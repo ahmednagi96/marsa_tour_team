@@ -24,6 +24,7 @@ class AppServiceProvider extends ServiceProvider
         $provider=config("payment.payment_providers.".config("payment.provider"));
         $this->app->bind(PaymentInterface::class,$provider);
         $this->app->bind(PaymentCallbackInterface::class,$provider);
+        
 
     }
 

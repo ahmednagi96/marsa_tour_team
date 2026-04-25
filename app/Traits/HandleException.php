@@ -2,14 +2,16 @@
 
 namespace App\Traits;
 
+use App\Exceptions\SmsRateLimitException;
+use App\Exceptions\TooManyAttemptsException;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Exceptions\ThrottleRequestsException;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Throwable;
-use Illuminate\Support\Str;
 
 trait HandleException
 {
@@ -21,6 +23,8 @@ trait HandleException
         $status = match (true) {
             $e instanceof ValidationException => 422,
             $e instanceof ThrottleRequestsException => 429,
+            $e instanceof TooManyAttemptsException => 429,
+            $e instanceof SmsRateLimitException => 429,
             $e instanceof ModelNotFoundException => 404,
             $e instanceof AuthenticationException => 401,
             $e instanceof AuthorizationException => 403,
@@ -28,11 +32,16 @@ trait HandleException
         };
 
         // 2. تجهيز الأخطاء (في حالة الـ Validation فقط)
-        $errors = ($e instanceof ValidationException) ? $e->errors() : null;
-
+        $errors = match (true) {
+            $e instanceof ValidationException => $e->errors(),
+            // هنا نجلب الثواني المتبقية من الإكسيبشن الخاص بك
+            $e instanceof TooManyAttemptsException => ['retry_after_seconds' => $e->getSeconds()],
+            default => null
+        };
         // 3. صياغة الرسالة النهائية
         $message = match ($status) {
             422 => __('exceptions.validation_error'),
+            $e instanceof \App\Exceptions\TooManyAttemptsException => $e->getMessage(),
             
             // تعديل الـ 404 لجلب رسالة ذكية ومترجمة
             404 => $e instanceof ModelNotFoundException 
@@ -48,6 +57,9 @@ trait HandleException
                 
             // في حالة الـ Server Error (500) بنظهر الخطأ الحقيقي فقط في وضع الـ Debug
             500 => config('app.debug') ? $e->getMessage() : __('exceptions.server_error'),
+            $e instanceof \App\Exceptions\SmsRateLimitException => $e->getMessage()   
+        ,
+
             
             default => $e->getMessage(),
         };

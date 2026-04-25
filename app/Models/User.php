@@ -3,9 +3,13 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+
+use App\Observers\UserObserver;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Notifications\Notification;
 use Laravel\Sanctum\HasApiTokens;
 
 /**
@@ -49,21 +53,15 @@ use Laravel\Sanctum\HasApiTokens;
  * @method static \Illuminate\Database\Eloquent\Builder|User whereUpdatedAt($value)
  * @mixin \Eloquent
  */
-class User extends Authenticatable
+
+
+#[ObservedBy(UserObserver::class)]
+ class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
 
     protected $fillable = [
-        'name',
-        'email',
-        'password',
-        'phone',
-        'code',
-        'expired_at',
-        'country',
-        'country_code',
-        'photo',
-        'fcm_token'
+        'name', 'phone', 'email', 'password', 'provider_id', 'provider_name', 'phone_verified_at'
     ];
    // public function getRouteKeyName(): string
    // {
@@ -83,5 +81,8 @@ class User extends Authenticatable
     //     return $this->hasMany(Order::class,'user_id');
     // }
 
-
+    public function routeNotificationForVonage(Notification $notification): string
+    {
+        return $this->phone;
+    }
 }
