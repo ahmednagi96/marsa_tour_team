@@ -8,10 +8,13 @@ use Illuminate\Http\JsonResponse;
 class InvalidOtpException extends Exception
 {
     use ApiResponse;
-
-    // 1. يفضل تحديد الرسالة والكود هنا بشكل افتراضي
-    protected $message = 'Invalid or expired OTP';
-    protected $code = 422;
+    protected $message;
+    protected $code;
+    public function __construct(?string $message = null,int $code=422)
+    {
+        $this->message= $message ??  'Invalid or expired OTP';
+        $this->code=$code ?? 422;
+    }
 
     /**
      * Render the exception into an HTTP response.

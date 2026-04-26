@@ -10,7 +10,7 @@ class RegisterUserRequest extends BaseRequest
     {
         return [
           //  'name' => 'required|string',
-            'phone' => 'required|unique:users,phone',
+            'phone' => 'required|',
             //'password' => 'required|min:8|confirmed'
         ];
     }

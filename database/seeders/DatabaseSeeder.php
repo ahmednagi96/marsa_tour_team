@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
+use App\Models\Country;
 use App\Models\Tour;
 use App\Models\TourAvailability;
 use App\Models\Trip;
@@ -27,12 +28,12 @@ class DatabaseSeeder extends Seeder
         #   'child_age_limit'=>random_int(10,15),
         #    'allows_children'=>random_int(0,1)
        # ]);
-       TourAvailability::create([
-        'tour_id'=>1,
-        'date'=>Carbon::now()->addDays(2),
-        'capacity'=>20,
-        'is_active'=>1
-       ]);
-
+      # TourAvailability::create([
+      #  'tour_id'=>1,
+      #  'date'=>Carbon::now()->addDays(2),
+      #  'capacity'=>20,
+      #  'is_active'=>1
+      # ]);
+        Country::factory(10)->create();
     }
 }
