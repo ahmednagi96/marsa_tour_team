@@ -40,6 +40,7 @@ class AuthController extends BaseController
         );
     }
 
+    
 
     public function completeRegistration(CompleteRegistrationRequest $request)
     {

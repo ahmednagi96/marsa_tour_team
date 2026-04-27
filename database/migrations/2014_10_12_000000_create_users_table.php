@@ -32,8 +32,8 @@ return new class extends Migration
         $table->timestamp('phone_verified_at')->nullable();
         $table->string('email')->nullable()->unique(); // Optional for social login
         $table->string('password')->nullable(); // Nullable for social users
-        $table->string('provider_id')->nullable(); // For Socialite
-        $table->string('provider_name')->nullable(); // google, facebook, etc.
+     //   $table->string('provider_id')->nullable(); // For Socialite
+      //  $table->string('provider_name')->nullable(); // google, facebook, etc.
         $table->rememberToken();
         $table->timestamps();
     });

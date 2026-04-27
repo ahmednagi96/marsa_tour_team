@@ -12,10 +12,13 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->string('phone')->nullable()->unique(); // Main identifier
-            $table->timestamp('phone_verified_at')->nullable();
-            $table->string('provider_id')->nullable(); // For Socialite
-            $table->string('provider_name')->nullable(); // google, facebook, etc.
+            
+            $table->string('provider')->nullable()->after('password');
+            $table->string('provider_id')->nullable()->after('provider');
+            
+            
+            $table->unique(['provider', 'provider_id']);
+
         });
     }
 
@@ -25,7 +28,8 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn(...['phone','phone_verified_at','provider_id','provider_name']);
+            $table->dropUnique(['provider', 'provider_id']);
+            $table->dropColumn(['provider']);
         });
     }
 };

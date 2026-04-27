@@ -70,7 +70,7 @@ class UserResource extends JsonResource
             ],
 
             'links' => [
-                'self' => route('users.show', $this->id),
+             //   'self' => route('users.show', $this->id),
             ],
         ];
     }
