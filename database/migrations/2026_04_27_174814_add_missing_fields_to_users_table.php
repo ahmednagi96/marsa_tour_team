@@ -16,9 +16,7 @@ return new class extends Migration
         if (!Schema::hasColumn('users', 'country_id')) {
             $table->foreignId("country_id")->nullable()->constrained("countries");
         }
-        if (!Schema::hasColumn('users', 'country_code')) {
-            $table->string('country_code', 10)->nullable()->after('country_id');
-        }
+       
         if (!Schema::hasColumn('users', 'avatar')) {
             $table->string('avatar')->nullable()->after('phone');
         }

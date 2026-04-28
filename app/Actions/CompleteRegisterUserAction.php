@@ -4,6 +4,7 @@ namespace App\Actions;
 
 use App\Exceptions\InvalidOtpException;
 use App\Exceptions\PhoneAlreadyExistsException;
+use App\Http\Resources\AuthResource;
 use App\Http\Resources\UserResource;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
@@ -11,7 +12,7 @@ use Illuminate\Support\Facades\Redis;
 
 class CompleteRegisterUserAction
 {
-    public function handle($data)
+    public function handle($data):AuthResource
     {
         $tokenKey = 'auth:reg_token:' . $data['registration_token'];
         $phone = Redis::get($tokenKey);
@@ -33,10 +34,10 @@ class CompleteRegisterUserAction
                 'last_login_at'     => now()
             ]);
             Redis::del($tokenKey);
-            return [
-                'user'  => new UserResource($user),
-                'token' => $user->createToken("auth-device", ['*'], now()->addMonths(2))->plainTextToken
-            ];
+            return  new AuthResource([
+                'user'  => new UserResource($user->load("country")),
+                'token' => $user->token()
+            ]);
         });
     }
 }

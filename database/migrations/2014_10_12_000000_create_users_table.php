@@ -26,10 +26,11 @@ return new class extends Migration
          #   $table->timestamps();
        # });
        Schema::create('users', function (Blueprint $table) {
-        $table->id();
+        $table->uuid('id')->primary(); 
         $table->string('name');
-        $table->string('phone')->unique(); // Main identifier
+        $table->string('phone')->nullable()->unique(); // Main identifier
         $table->timestamp('phone_verified_at')->nullable();
+        $table->timestamp('email_verified_at')->nullable();
         $table->string('email')->nullable()->unique(); // Optional for social login
         $table->string('password')->nullable(); // Nullable for social users
      //   $table->string('provider_id')->nullable(); // For Socialite

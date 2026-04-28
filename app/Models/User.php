@@ -14,6 +14,8 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Notifications\Notification;
 use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
+
 
 /**
  * @property int $id
@@ -61,7 +63,7 @@ use Laravel\Sanctum\HasApiTokens;
 #[ObservedBy(UserObserver::class)]
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable, SoftDeletes;
+    use HasApiTokens, HasFactory, Notifiable, SoftDeletes,HasUuids;
 
     protected $fillable = [
         'name',
@@ -71,6 +73,7 @@ class User extends Authenticatable
          'provider',
         'provider_id',  
         'phone_verified_at',
+        'email_verified_at',
         'country_id',
         'avatar',
         'fcm_token',
@@ -117,5 +120,14 @@ class User extends Authenticatable
     public function country(): BelongsTo
     {
         return $this->belongsTo(Country::class, "country_id");
+    }
+
+    public function token(){
+        $name=$this->phone ?? $this->email;
+        return $this->createToken(
+            name: "{$name}_auth",
+            abilities: ['*'],
+            expiresAt: now()->addMonths(2)
+        )->plainTextToken;
     }
 }

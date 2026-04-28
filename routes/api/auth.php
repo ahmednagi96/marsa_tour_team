@@ -20,3 +20,6 @@ Route::middleware("guest:sanctum")->group(function () {
             ->whereIn('provider', ['google', 'github']);
     });
 });
+Route::middleware("auth:sanctum")->controller(AuthController::class)->as("user")->name("user.")->group(function(){
+    Route::get("/","show")->name("show");
+});
